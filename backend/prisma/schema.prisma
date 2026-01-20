@@ -1,0 +1,43 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String          @id @default(uuid())
+  firstName    String
+  lastName     String
+  email        String          @unique
+  passwordHash String          @map("password_hash")
+  createdAt    DateTime        @default(now()) @map("created_at")
+  entries      LearningEntry[]
+
+  @@map("users")
+}
+
+model LearningEntry {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  title           String
+  platform        String
+  domain          String
+  subDomain       String?  @map("sub_domain")
+  startDate       DateTime @map("start_date")
+  completionDate  DateTime @map("completion_date")
+  skills          String[] @default([])
+  description     String?
+  reflection      String?  @map("reflection")
+  certificatePath String?  @map("certificate_path")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("learning_entries")
+}
