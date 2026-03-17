@@ -29,6 +29,7 @@ model LearningEntry {
   platform        String
   domain          String
   subDomain       String?  @map("sub_domain")
+  hoursSpent      Int?     @map("hours_spent")
   startDate       DateTime @map("start_date")
   completionDate  DateTime @map("completion_date")
   skills          String[] @default([])

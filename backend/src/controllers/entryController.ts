@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { body, validationResult, query } from 'express-validator';
 import { AuthRequest } from '../types';
 import * as entryService from '../services/entryService';
@@ -41,12 +41,15 @@ export const createEntry = [
           skills = [];
         }
       }
+
+      const hoursSpent = req.body.hoursSpent ? parseInt(req.body.hoursSpent, 10) : undefined;
       
       const data = {
         title: req.body.title,
         platform: req.body.platform,
         domain: req.body.domain,
         subDomain: req.body.subDomain || undefined,
+        hoursSpent,
         startDate: new Date(req.body.startDate),
         completionDate: new Date(req.body.completionDate),
         skills,
@@ -143,6 +146,9 @@ export const updateEntry = [
       if (req.body.description !== undefined) data.description = req.body.description || undefined;
       if (req.body.reflection !== undefined) data.reflection = req.body.reflection || undefined;
       if (req.file) data.certificatePath = `/uploads/certificates/${req.file.filename}`;
+
+      const hoursSpent = req.body.hoursSpent ? parseInt(req.body.hoursSpent, 10) : undefined;
+      if (hoursSpent !== undefined) data.hoursSpent = hoursSpent;
 
       const entry = await entryService.updateEntry(userId, id, data);
       res.json(entry);

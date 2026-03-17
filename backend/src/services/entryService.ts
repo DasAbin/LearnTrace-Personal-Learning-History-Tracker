@@ -5,6 +5,7 @@ export interface CreateEntryData {
   platform: string;
   domain: string;
   subDomain?: string;
+  hoursSpent?: number;
   startDate: Date;
   completionDate: Date;
   skills: string[];

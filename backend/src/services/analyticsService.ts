@@ -8,9 +8,8 @@ export const getSummary = async (userId: string) => {
 
   const totalEntries = entries.length;
   
-  // Calculate total hours (rough estimate: 1 entry = 8 hours average)
-  // In a real app, you'd track hours per entry
-  const totalHours = entries.length * 8;
+  // Calculate total hours based on actual hours spent per entry
+  const totalHours = entries.reduce((sum, e) => sum + (e.hoursSpent ?? 0), 0);
 
   // Calculate streak (consecutive days with entries)
   let streak = 0;
@@ -126,7 +125,7 @@ export const getHeatmapData = async (userId: string) => {
       heatmap[dateStr] = { count: 0, hours: 0 };
     }
     heatmap[dateStr].count += 1;
-    heatmap[dateStr].hours += 8; // Rough estimate
+    heatmap[dateStr].hours += (entry.hoursSpent ?? 0);
   });
 
   return heatmap;

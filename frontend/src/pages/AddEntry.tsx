@@ -23,6 +23,7 @@ interface FormData {
   platform: string;
   domain: string;
   subDomain: string;
+  hoursSpent: string;
   startDate: string;
   completionDate: string;
   description: string;
@@ -60,6 +61,7 @@ export default function AddEntry() {
       setValue('platform', entry.platform);
       setValue('domain', entry.domain);
       setValue('subDomain', entry.subDomain || '');
+      setValue('hoursSpent', entry.hoursSpent?.toString() || '');
       setValue('startDate', entry.startDate.split('T')[0]);
       setValue('completionDate', entry.completionDate.split('T')[0]);
       setValue('description', entry.description || '');
@@ -125,6 +127,7 @@ export default function AddEntry() {
       formData.append('platform', data.platform);
       formData.append('domain', data.domain);
       if (data.subDomain) formData.append('subDomain', data.subDomain);
+      if (data.hoursSpent) formData.append('hoursSpent', data.hoursSpent);
       formData.append('startDate', data.startDate);
       formData.append('completionDate', data.completionDate);
       formData.append('skills', JSON.stringify(skills));
@@ -247,6 +250,17 @@ export default function AddEntry() {
                             className="w-full px-4 py-3 bg-gray-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500/10"
                         />
                     </div>
+                </div>
+
+                <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Hours Spent</label>
+                    <input
+                        type="number"
+                        min="0"
+                        {...register('hoursSpent')}
+                        className="w-full px-4 py-3 bg-gray-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500/10"
+                        placeholder="e.g. 4"
+                    />
                 </div>
 
                 <div>

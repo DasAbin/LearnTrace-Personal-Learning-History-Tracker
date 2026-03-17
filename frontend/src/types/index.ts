@@ -13,6 +13,7 @@ export interface LearningEntry {
   platform: string;
   domain: string;
   subDomain?: string;
+  hoursSpent?: number;
   startDate: string;
   completionDate: string;
   skills: string[];
