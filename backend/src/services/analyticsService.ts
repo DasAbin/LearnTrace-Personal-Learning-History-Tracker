@@ -3,7 +3,12 @@ import prisma from '../lib/prisma';
 export const getSummary = async (userId: string) => {
   const entries = await prisma.learningEntry.findMany({
     where: { userId },
-    orderBy: { completionDate: 'desc' }
+    orderBy: { completionDate: 'desc' },
+    select: {
+      completionDate: true,
+      hoursSpent: true,
+      skills: true
+    }
   });
 
   const totalEntries = entries.length;
@@ -72,41 +77,49 @@ export const getSummary = async (userId: string) => {
 };
 
 export const getDomainDistribution = async (userId: string) => {
-  const entries = await prisma.learningEntry.findMany({
-    where: { userId }
+  const groups = await prisma.learningEntry.groupBy({
+    by: ['domain'],
+    where: { userId },
+    _count: { id: true }
   });
 
   const distribution: Record<string, number> = {};
-  entries.forEach(entry => {
-    distribution[entry.domain] = (distribution[entry.domain] || 0) + 1;
+  groups.forEach(group => {
+    distribution[group.domain] = group._count.id;
   });
 
   return distribution;
 };
 
+type YearRow = { year: string; count: number };
+
 export const getYearlyTrend = async (userId: string) => {
-  const entries = await prisma.learningEntry.findMany({
-    where: { userId },
-    orderBy: { completionDate: 'asc' }
-  });
+  const results = await prisma.$queryRaw<YearRow[]>`
+    SELECT EXTRACT(YEAR FROM completion_date)::text AS year, COUNT(*)::int AS count
+    FROM learning_entries
+    WHERE user_id = ${userId}
+    GROUP BY year
+    ORDER BY year ASC
+  `;
 
   const trend: Record<string, number> = {};
-  entries.forEach(entry => {
-    const year = entry.completionDate.getFullYear().toString();
-    trend[year] = (trend[year] || 0) + 1;
+  results.forEach(row => {
+    trend[row.year] = row.count;
   });
 
   return trend;
 };
 
 export const getPlatformUsage = async (userId: string) => {
-  const entries = await prisma.learningEntry.findMany({
-    where: { userId }
+  const groups = await prisma.learningEntry.groupBy({
+    by: ['platform'],
+    where: { userId },
+    _count: { id: true }
   });
 
   const usage: Record<string, number> = {};
-  entries.forEach(entry => {
-    usage[entry.platform] = (usage[entry.platform] || 0) + 1;
+  groups.forEach(group => {
+    usage[group.platform] = group._count.id;
   });
 
   return usage;
@@ -114,7 +127,8 @@ export const getPlatformUsage = async (userId: string) => {
 
 export const getSkillsFrequency = async (userId: string) => {
   const entries = await prisma.learningEntry.findMany({
-    where: { userId }
+    where: { userId },
+    select: { skills: true }
   });
 
   const frequency: Record<string, number> = {};
@@ -129,7 +143,8 @@ export const getSkillsFrequency = async (userId: string) => {
 
 export const getHeatmapData = async (userId: string) => {
   const entries = await prisma.learningEntry.findMany({
-    where: { userId }
+    where: { userId },
+    select: { completionDate: true, hoursSpent: true }
   });
 
   const heatmap: Record<string, { count: number; hours: number }> = {};
