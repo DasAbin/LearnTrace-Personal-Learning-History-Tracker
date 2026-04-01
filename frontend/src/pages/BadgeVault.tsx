@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { entriesAPI } from '../utils/api';
 import { LearningEntry } from '../types';
-import { X, Search, Filter, Award, Maximize2, ExternalLink } from 'lucide-react';
+import { X, Search, Filter, Award, Maximize2, ExternalLink, AlertCircle, RefreshCcw } from 'lucide-react';
 
 const DOMAINS = [
   'Programming',
@@ -20,6 +20,7 @@ const DOMAINS = [
 export default function BadgeVault() {
   const [entries, setEntries] = useState<LearningEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filterDomain, setFilterDomain] = useState('');
   const [filterPlatform, setFilterPlatform] = useState('');
   const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -30,6 +31,7 @@ export default function BadgeVault() {
 
   const loadEntries = async () => {
     setLoading(true);
+    setError(null);
     try {
       const data = await entriesAPI.getAll({
         domain: filterDomain || undefined,
@@ -39,6 +41,7 @@ export default function BadgeVault() {
       setEntries(entriesWithCertificates);
     } catch (error) {
       console.error('Failed to load entries', error);
+      setError('Failed to load certificates from your vault.');
     } finally {
       setLoading(false);
     }
@@ -61,7 +64,7 @@ export default function BadgeVault() {
     <div className="max-w-7xl mx-auto pb-20 animate-in fade-in duration-700">
       <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12">
         <div>
-          <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Badge Vault</h1>
+          <h1 className="text-4xl font-bold text-[#1C1917] tracking-tight">Badge Vault</h1>
           <p className="text-gray-500 mt-2 font-medium">A curated selection of your verified achievements.</p>
         </div>
       </header>
@@ -69,11 +72,11 @@ export default function BadgeVault() {
       {/* Modern Filter Bar */}
       <div className="flex flex-col md:flex-row gap-4 mb-12 bg-white p-4 rounded-3xl border border-gray-100 shadow-sm">
         <div className="flex-1 relative group">
-            <Filter className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+            <Filter className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-amber-500 transition-colors" />
             <select
                 value={filterDomain}
                 onChange={(e) => setFilterDomain(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-gray-50 border-transparent rounded-2xl text-sm font-bold text-gray-900 focus:ring-0 focus:bg-white transition-all appearance-none cursor-pointer"
+                className="w-full pl-12 pr-4 py-3 bg-gray-50 border-transparent rounded-2xl text-sm font-bold text-[#1C1917] focus:ring-2 focus:ring-amber-500/10 transition-all appearance-none cursor-pointer"
             >
                 <option value="">All Domains</option>
                 {DOMAINS.map((domain) => (
@@ -83,11 +86,11 @@ export default function BadgeVault() {
         </div>
 
         <div className="flex-1 relative group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-amber-500 transition-colors" />
             <select
                 value={filterPlatform}
                 onChange={(e) => setFilterPlatform(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-gray-50 border-transparent rounded-2xl text-sm font-bold text-gray-900 focus:ring-0 focus:bg-white transition-all appearance-none cursor-pointer"
+                className="w-full pl-12 pr-4 py-3 bg-gray-50 border-transparent rounded-2xl text-sm font-bold text-[#1C1917] focus:ring-2 focus:ring-amber-500/10 transition-all appearance-none cursor-pointer"
             >
                 <option value="">All Platforms</option>
                 {uniquePlatforms.map((platform) => (
@@ -99,19 +102,37 @@ export default function BadgeVault() {
 
       {/* Gallery Grid */}
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 animate-pulse">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-              <div key={i} className="aspect-[4/3] bg-gray-50 rounded-[32px]" />
+              <div key={i} className="aspect-[4/3] bg-gray-100 animate-shimmer rounded-[32px]" />
           ))}
         </div>
+      ) : error ? (
+        <div className="max-w-xl mx-auto py-20 text-center space-y-6">
+          <div className="h-20 w-20 bg-red-50 rounded-[30px] flex items-center justify-center text-red-500 mx-auto border border-red-100 shadow-sm">
+              <AlertCircle size={40} />
+          </div>
+          <div className="space-y-2">
+              <h2 className="text-2xl font-bold text-gray-900 leading-tight">Vault Access Failed</h2>
+              <p className="text-gray-500 text-sm font-medium leading-relaxed">{error}</p>
+          </div>
+          <button
+            onClick={loadEntries}
+            className="flex items-center justify-center gap-2 mx-auto bg-gray-900 text-white px-8 py-4 rounded-2xl text-sm font-bold hover:bg-black transition-all shadow-xl shadow-gray-200 active:scale-95"
+          >
+            <RefreshCcw className="h-4 w-4" />
+            Retry Access
+          </button>
+        </div>
       ) : entries.length === 0 ? (
+
         <div className="max-w-md mx-auto py-20 text-center space-y-6">
             <div className="h-20 w-20 bg-gray-50 rounded-[30px] flex items-center justify-center text-gray-300 mx-auto border border-gray-100 shadow-sm">
                 <Award size={40} />
             </div>
-            <p className="text-gray-900 font-bold text-xl">Vault Empty</p>
+            <p className="text-[#1C1917] font-bold text-xl">Vault Empty</p>
             <p className="text-gray-400 text-sm">You haven't uploaded any certificates yet. Achievements will appear here once verified.</p>
-            <Link to="/entries/new" className="inline-flex items-center gap-2 text-blue-600 font-bold hover:underline">
+            <Link to="/entries/new" className="inline-flex items-center gap-2 text-amber-600 font-bold hover:underline">
                 Collect your first badge <ExternalLink className="h-4 w-4" />
             </Link>
         </div>
@@ -182,7 +203,7 @@ export default function BadgeVault() {
                     href={previewImage} 
                     target="_blank" 
                     rel="noreferrer" 
-                    className="px-8 py-3 bg-white text-gray-900 rounded-2xl text-sm font-bold shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+                    className="px-8 py-3 bg-orange-500 text-white rounded-2xl text-sm font-bold shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
                 >
                     <ExternalLink className="h-4 w-4" />
                     Open Source 

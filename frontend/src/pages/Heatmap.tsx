@@ -31,9 +31,11 @@ export default function Heatmap() {
   };
 
   const getColor = (intensity: number): string => {
-    if (intensity === 0) return 'rgba(243, 244, 246, 1)'; // bg-gray-100
-    // Lighter to darker blue based on intensity
-    return `rgba(59, 130, 246, ${0.1 + intensity * 0.9})`; 
+    if (intensity === 0) return '#FEF3C7'; // no-activity
+    if (intensity <= 0.25) return '#FDE68A'; // low
+    if (intensity <= 0.5) return '#F59E0B'; // medium
+    if (intensity <= 0.75) return '#D97706'; // high
+    return '#92400E'; // peak
   };
 
   // Generate calendar data
@@ -111,7 +113,7 @@ export default function Heatmap() {
       <section className="bg-white rounded-[32px] border border-gray-100 p-10 shadow-sm overflow-hidden">
         <div className="flex items-center justify-between mb-10">
             <div className="flex items-center gap-3">
-                <div className="h-10 w-10 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
+                <div className="h-10 w-10 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600">
                     <CalendarIcon className="h-5 w-5" />
                 </div>
                 <div>
@@ -154,7 +156,7 @@ export default function Heatmap() {
                                     <div
                                         key={dateKey}
                                         className={`w-3.5 h-3.5 rounded-sm transition-all duration-200 cursor-crosshair ${
-                                            isHovered ? 'scale-150 z-10 shadow-lg ring-2 ring-white ring-offset-1 ring-offset-blue-500' : ''
+                                            isHovered ? 'scale-150 z-10 shadow-lg ring-2 ring-white ring-offset-1 ring-offset-amber-500' : ''
                                         }`}
                                         style={{ backgroundColor: getColor(intensity) }}
                                         onMouseEnter={() => setHoveredDate(dateKey)}
@@ -178,7 +180,7 @@ export default function Heatmap() {
                         <div className="h-10 w-px bg-gray-200" />
                         <div className="flex flex-col">
                             <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Activity</span>
-                            <span className="text-lg font-bold text-blue-600">
+                            <span className="text-lg font-bold text-amber-600">
                                 {heatmapData[hoveredDate]?.count || 0} Milestones
                                 <span className="text-gray-400 font-medium text-sm ml-2">
                                     ({heatmapData[hoveredDate]?.hours || 0} hours)

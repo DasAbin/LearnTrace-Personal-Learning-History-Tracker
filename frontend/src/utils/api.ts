@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { AuthResponse, User, LearningEntry, DashboardSummary } from '../types';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api/v1';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -60,6 +60,10 @@ export const authAPI = {
     const response = await api.get('/auth/me');
     return response.data;
   },
+  resendVerification: async (): Promise<{ message: string; token: string }> => {
+    const response = await api.post('/auth/resend-verification');
+    return response.data;
+  },
 };
 
 export const entriesAPI = {
@@ -77,6 +81,10 @@ export const entriesAPI = {
     search?: string;
   }): Promise<LearningEntry[]> => {
     const response = await api.get('/entries', { params: filters });
+    return response.data.data || response.data;
+  },
+  getPage: async (filters: any, cursor?: string, limit = 20): Promise<{ data: LearningEntry[], nextCursor: string | null }> => {
+    const response = await api.get('/entries', { params: { ...filters, cursor, limit } });
     return response.data;
   },
   getById: async (id: string): Promise<LearningEntry> => {

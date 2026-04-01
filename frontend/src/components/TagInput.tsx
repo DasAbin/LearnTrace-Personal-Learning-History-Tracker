@@ -53,7 +53,7 @@ export const TagInput = ({ tags, onChange, placeholder = 'Add skills (comma sepa
   };
 
   return (
-    <div className="group min-h-[52px] w-full px-3 py-2 bg-white border border-gray-200 rounded-xl flex flex-wrap gap-2 transition-all duration-200 focus-within:ring-4 focus-within:ring-blue-500/10 focus-within:border-blue-500 shadow-sm">
+    <div className="group min-h-[52px] w-full px-3 py-2 bg-white border border-gray-200 rounded-xl flex flex-wrap gap-2 transition-all duration-200 focus-within:ring-4 focus-within:ring-amber-500/10 focus-within:border-amber-500 shadow-sm">
       {tags.map((tag, index) => (
         <span
           key={index}

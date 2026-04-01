@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import prisma from '../lib/prisma';
+import logger from '../lib/logger';
 
 export interface CreateEntryData {
   title: string;
@@ -60,8 +61,9 @@ export const getEntries = async (
     endDate?: Date;
     search?: string;
   },
-  page?: number,
-  limit?: number
+  cursor?: string, // last entry id
+  limit: number = 20,
+  page?: number
 ) => {
   const where: any = { userId };
 
@@ -92,6 +94,29 @@ export const getEntries = async (
     ];
   }
 
+  // Cursor-based pagination (Infinite Scroll)
+  if (cursor || (limit && !page)) {
+    const results = await prisma.learningEntry.findMany({
+      where,
+      take: limit + 1,
+      cursor: cursor ? { id: cursor } : undefined,
+      skip: cursor ? 1 : 0,
+      orderBy: { completionDate: 'desc' },
+    });
+
+    let nextCursor: string | null = null;
+    if (results.length > limit) {
+      const nextItem = results.pop();
+      nextCursor = nextItem!.id;
+    }
+
+    return {
+      data: results,
+      nextCursor,
+    };
+  }
+
+  // Offset-based pagination (Backward compatibility)
   if (page && limit) {
     const skip = (page - 1) * limit;
     const [data, total] = await Promise.all([
@@ -160,7 +185,7 @@ export const deleteEntry = async (userId: string, entryId: string) => {
         await fs.unlink(absolutePath);
       }
     } catch (error) {
-      console.error('Failed to delete certificate file:', error);
+      logger.error({ entryId, error }, 'Failed to delete certificate file');
     }
   }
 

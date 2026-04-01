@@ -3,8 +3,11 @@ import jwt from 'jsonwebtoken';
 import { AuthRequest } from '../types';
 
 function getJwtSecret() {
-  // Read at request-time so dotenv load order can't cause mismatches.
-  return process.env.JWT_SECRET || 'default-secret-change-in-production';
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET is not defined in environment variables');
+  }
+  return secret;
 }
 
 /**
