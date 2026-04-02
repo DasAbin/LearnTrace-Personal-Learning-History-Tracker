@@ -17,6 +17,8 @@ model User {
   email            String          @unique
   passwordHash     String          @map("password_hash")
   createdAt        DateTime        @default(now()) @map("created_at")
+  emailVerified      Boolean         @default(false) @map("email_verified")
+  verificationToken  String?         @unique @map("verification_token")
   resetToken       String?         @map("reset_token")
   resetTokenExpiry DateTime?       @map("reset_token_expiry")
   refreshToken     String?         @map("refresh_token")
@@ -48,5 +50,18 @@ model LearningEntry {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId, completionDate(sort: Desc)])
+  @@index([userId, domain])
+  @@index([userId, platform])
+  @@index([userId, createdAt(sort: Desc)])
+
   @@map("learning_entries")
+}
+
+model IdempotencyKey {
+  key       String   @id
+  entryId   String   @map("entry_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("idempotency_keys")
 }

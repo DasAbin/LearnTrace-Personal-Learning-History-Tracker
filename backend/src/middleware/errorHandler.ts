@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import logger from '../lib/logger';
 
 /**
  * Centralized Error Handling Middleware
@@ -6,32 +7,31 @@ import { Request, Response, NextFunction } from 'express';
  * Catches all unhandled errors and returns appropriate HTTP responses.
  * In production, hides error details for security.
  */
-export const errorHandler = (
-  err: Error,
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  console.error('Error:', err);
-  
-  // Handle Prisma errors
-  if (err.name === 'PrismaClientKnownRequestError') {
-    return res.status(400).json({
-      error: 'Database operation failed'
-    });
-  }
-  
-  // Handle validation errors
-  if (err.name === 'ValidationError') {
-    return res.status(400).json({
-      error: err.message
-    });
-  }
-  
-  // Generic error response
-  res.status(500).json({
-    error: process.env.NODE_ENV === 'production' 
-      ? 'Internal server error' 
-      : err.message
+export const errorHandler = (err: any, req: Request, res: Response, _next: NextFunction) => {
+  const statusCode = err.statusCode || 500;
+  const isProduction = process.env.NODE_ENV === 'production';
+
+  // Structured Logging
+  logger.error({
+    err: {
+      message: err.message,
+      stack: isProduction ? undefined : err.stack,
+      name: err.name,
+      ...err
+    },
+    req: {
+      method: req.method,
+      url: req.url,
+      params: req.params,
+      query: req.query,
+      ip: req.ip,
+      headers: isProduction ? undefined : req.headers
+    }
+  }, 'Unhandled Exception');
+
+  // API Response
+  res.status(statusCode).json({
+    error: isProduction ? 'Internal server error' : err.message,
+    ...( !isProduction && { stack: err.stack })
   });
 };

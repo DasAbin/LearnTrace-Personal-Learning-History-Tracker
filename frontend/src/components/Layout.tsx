@@ -42,13 +42,13 @@ export const Layout = ({ children }: LayoutProps) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link to="/dashboard" className="flex items-center space-x-2">
-              <BookOpen className="h-6 w-6 text-primary" />
-              <span className="text-xl font-semibold text-deep-blue">LearnTrace</span>
+              <BookOpen className="h-6 w-6 text-orange-500" />
+              <span className="text-xl font-semibold text-[#1C1917]">LearnTrace</span>
             </Link>
             <div className="flex items-center space-x-4">
               <Link
                 to="/entries/new"
-                className="flex items-center space-x-2 bg-primary text-white px-4 py-2 rounded-button hover:bg-blue-600 transition-colors"
+                className="flex items-center space-x-2 bg-orange-500 text-white px-4 py-2 rounded-button hover:bg-orange-600 transition-colors"
               >
                 <Plus className="h-4 w-4" />
                 <span className="hidden sm:inline">Add Entry</span>
@@ -79,10 +79,10 @@ export const Layout = ({ children }: LayoutProps) => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-button transition-colors ${
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-button transition-colors border ${
                     isActive
-                      ? 'bg-primary text-white'
-                      : 'bg-card text-gray-700 hover:bg-gray-100 shadow-soft'
+                      ? 'bg-amber-50 text-amber-700 border-amber-200 shadow-sm'
+                      : 'bg-card text-gray-700 border-transparent hover:bg-gray-100 shadow-soft'
                   }`}
                 >
                   <Icon className="h-4 w-4" />

@@ -42,7 +42,7 @@ export default function Profile() {
   return (
     <div className="max-w-6xl mx-auto pb-20 animate-in fade-in duration-700">
       <header className="mb-12">
-        <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Account</h1>
+        <h1 className="text-4xl font-bold text-[#1C1917] tracking-tight">Account</h1>
         <p className="text-gray-500 mt-2 font-medium">Manage your profile and data footprint.</p>
       </header>
 
@@ -56,11 +56,11 @@ export default function Profile() {
                 </div>
                 
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-8 relative">
-                    <div className="h-24 w-24 bg-blue-600 rounded-3xl flex items-center justify-center text-white text-3xl font-bold shadow-xl shadow-blue-500/20">
+                    <div className="h-24 w-24 bg-orange-500 rounded-3xl flex items-center justify-center text-white text-3xl font-bold shadow-xl shadow-orange-500/20">
                         {user.firstName[0]}{user.lastName[0]}
                     </div>
                     <div>
-                        <h2 className="text-3xl font-bold text-gray-900">{user.firstName} {user.lastName}</h2>
+                        <h2 className="text-3xl font-bold text-[#1C1917]">{user.firstName} {user.lastName}</h2>
                         <div className="flex flex-wrap gap-4 mt-3">
                             <div className="flex items-center gap-2 text-gray-400 font-medium text-sm">
                                 <Mail className="h-4 w-4" />
@@ -80,21 +80,21 @@ export default function Profile() {
                              <Activity className="h-3 w-3" />
                              Activity Streak
                         </span>
-                        <p className="text-xl font-bold text-gray-900">{summary?.streak || 0} Days</p>
+                        <p className="text-xl font-bold text-[#1C1917]">{summary?.streak || 0} Days</p>
                     </div>
                     <div className="space-y-1">
                         <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
                              <Trophy className="h-3 w-3" />
                              Milestones
                         </span>
-                        <p className="text-xl font-bold text-gray-900">{summary?.totalEntries || 0}</p>
+                        <p className="text-xl font-bold text-[#1C1917]">{summary?.totalEntries || 0}</p>
                     </div>
                     <div className="space-y-1">
                         <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
                              <Code className="h-3 w-3" />
                              Skill Depth
                         </span>
-                        <p className="text-xl font-bold text-gray-900">{summary?.uniqueSkills || 0} Areas</p>
+                        <p className="text-xl font-bold text-[#1C1917]">{summary?.uniqueSkills || 0} Areas</p>
                     </div>
                 </div>
             </section>
@@ -102,18 +102,18 @@ export default function Profile() {
             {/* Data Management Section */}
             <section className="bg-gray-50 rounded-[32px] p-10 border border-gray-100">
                 <div className="flex items-center gap-3 mb-8">
-                    <div className="h-10 w-10 bg-white rounded-2xl flex items-center justify-center text-gray-900 shadow-sm">
+                    <div className="h-10 w-10 bg-white rounded-2xl flex items-center justify-center text-[#1C1917] shadow-sm">
                         <Database className="h-5 w-5" />
                     </div>
                     <div>
-                        <h2 className="text-xl font-bold text-gray-900">Data Management</h2>
+                        <h2 className="text-xl font-bold text-[#1C1917]">Data Management</h2>
                         <p className="text-xs text-gray-500 font-medium">Your learning history belongs to you.</p>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-4">
-                        <h3 className="text-sm font-bold text-gray-900">Archive Locally</h3>
+                        <h3 className="text-sm font-bold text-[#1C1917]">Archive Locally</h3>
                         <p className="text-sm text-gray-500 leading-relaxed">
                             Download your entire learning history. We support standard portable formats for your personal records or for importing into other tools.
                         </p>
@@ -126,9 +126,9 @@ export default function Profile() {
                         >
                             <span className="text-sm font-bold text-gray-700">Export as JSON</span>
                             {exporting === 'json' ? (
-                                <span className="h-4 w-4 border-2 border-gray-200 border-t-blue-500 rounded-full animate-spin" />
+                                <span className="h-4 w-4 border-2 border-gray-200 border-t-amber-500 rounded-full animate-spin" />
                             ) : (
-                                <Download className="h-4 w-4 text-gray-300 group-hover:text-blue-500 transition-colors" />
+                                <Download className="h-4 w-4 text-gray-300 group-hover:text-amber-600 transition-colors" />
                             )}
                         </button>
                         <button
@@ -138,9 +138,9 @@ export default function Profile() {
                         >
                             <span className="text-sm font-bold text-gray-700">Export as CSV</span>
                             {exporting === 'csv' ? (
-                                <span className="h-4 w-4 border-2 border-gray-200 border-t-blue-500 rounded-full animate-spin" />
+                                <span className="h-4 w-4 border-2 border-gray-200 border-t-amber-500 rounded-full animate-spin" />
                             ) : (
-                                <Download className="h-4 w-4 text-gray-300 group-hover:text-blue-500 transition-colors" />
+                                <Download className="h-4 w-4 text-gray-300 group-hover:text-amber-600 transition-colors" />
                             )}
                         </button>
                     </div>
@@ -172,12 +172,12 @@ export default function Profile() {
                 </button>
             </div>
 
-            <div className="p-8 bg-blue-600 rounded-[32px] text-white shadow-xl shadow-blue-500/20 relative overflow-hidden group">
+            <div className="p-8 bg-gray-900 bg-gradient-to-br from-orange-900 to-gray-900 rounded-[32px] text-white shadow-xl shadow-orange-500/10 relative overflow-hidden group">
                 <div className="absolute -top-4 -right-4 h-24 w-24 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
                 <div className="relative">
                     <Info className="h-6 w-6 mb-4 opacity-50" />
                     <p className="text-sm font-bold mb-2">Did you know?</p>
-                    <p className="text-xs text-blue-100 leading-relaxed">
+                    <p className="text-xs text-amber-100/80 leading-relaxed">
                         LearnTrace automatically calculates your learning velocity based on your completion dates. Keep logging to improve your accuracy!
                     </p>
                 </div>

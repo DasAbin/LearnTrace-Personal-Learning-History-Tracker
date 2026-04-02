@@ -2,6 +2,9 @@ import { Response } from 'express';
 import { body, validationResult, query } from 'express-validator';
 import { AuthRequest } from '../types';
 import * as entryService from '../services/entryService';
+import { asyncHandler } from '../middleware/asyncHandler';
+import logger from '../lib/logger';
+import prisma from '../lib/prisma';
 import fs from 'fs';
 import path from 'path';
 
@@ -59,10 +62,29 @@ export const createEntry = [
         difficulty: req.body.difficulty || undefined,
         rating: req.body.rating ? parseInt(req.body.rating, 10) : undefined,
         resourceUrl: req.body.resourceUrl || undefined,
-        certificatePath: req.file ? req.file.path : undefined
+        certificatePath: req.file ? `/uploads/certificates/${path.basename(req.file.path)}` : undefined
       };
 
+      const idempotencyKey = req.headers['idempotency-key'] as string;
+      if (idempotencyKey) {
+        const existingKey = await prisma.idempotencyKey.findUnique({
+          where: { key: idempotencyKey }
+        });
+
+        if (existingKey) {
+          const entry = await entryService.getEntryById(userId, existingKey.entryId);
+          return res.status(409).json(entry);
+        }
+      }
+
       const entry = await entryService.createEntry(userId, data);
+
+      if (idempotencyKey) {
+        await prisma.idempotencyKey.create({
+          data: { key: idempotencyKey, entryId: entry.id }
+        });
+      }
+
       res.status(201).json(entry);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
@@ -90,10 +112,11 @@ export const getEntries = [
       if (req.query.endDate) filters.endDate = new Date(req.query.endDate as string);
       if (req.query.search) filters.search = req.query.search;
       
-      const page = req.query.page ? parseInt(req.query.page as string, 10) : undefined;
-      const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : undefined;
+      const cursor = req.query.cursor as string | undefined;
+      const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 20;
+      const page = req.query.page && !cursor ? parseInt(req.query.page as string, 10) : undefined;
 
-      const entries = await entryService.getEntries(userId, filters, page, limit);
+      const entries = await entryService.getEntries(userId, filters, cursor, limit, page);
       res.json(entries);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -101,31 +124,24 @@ export const getEntries = [
   }
 ];
 
-export const getEntryById = async (req: AuthRequest, res: Response) => {
-  try {
-    const userId = req.userId!;
-    const { id } = req.params;
+export const getEntryById = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const userId = req.userId!;
+  const { id } = req.params;
 
-    const entry = await entryService.getEntryById(userId, id);
-    if (!entry) {
-      return res.status(404).json({ error: 'Entry not found' });
-    }
-
-    res.json(entry);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  const entry = await entryService.getEntryById(userId, id);
+  if (!entry) {
+    return res.status(404).json({ error: 'Entry not found' });
   }
-};
 
-export const getMetadata = async (req: AuthRequest, res: Response) => {
-  try {
-    const userId = req.userId!;
-    const metadata = await entryService.getMetadata(userId);
-    res.json(metadata);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
-};
+  res.json(entry);
+});
+
+export const getMetadata = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const userId = req.userId!;
+  const metadata = await entryService.getMetadata(userId);
+  res.json(metadata);
+});
+
 
 export const updateEntry = [
   body('title').optional().trim().notEmpty(),
@@ -175,7 +191,7 @@ export const updateEntry = [
       if (req.body.resourceUrl !== undefined) data.resourceUrl = req.body.resourceUrl || undefined;
       
       if (req.file) {
-        data.certificatePath = req.file.path;
+        data.certificatePath = `/uploads/certificates/${path.basename(req.file.path)}`;
         
         // If req.file exists AND existing entry has a certificatePath, delete the old file
         if (existingEntry?.certificatePath) {
@@ -196,7 +212,7 @@ export const updateEntry = [
               await fs.promises.unlink(absolutePath);
             }
           } catch (error) {
-            console.error('Failed to delete old certificate file:', error);
+            logger.error({ entryId: id, error }, 'Failed to delete old certificate file');
           }
         }
       }
@@ -212,14 +228,11 @@ export const updateEntry = [
   }
 ];
 
-export const deleteEntry = async (req: AuthRequest, res: Response) => {
-  try {
-    const userId = req.userId!;
-    const { id } = req.params;
+export const deleteEntry = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const userId = req.userId!;
+  const { id } = req.params;
 
-    await entryService.deleteEntry(userId, id);
-    res.status(204).send();
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
-  }
-};
+  await entryService.deleteEntry(userId, id);
+  res.status(204).send();
+});
+

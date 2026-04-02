@@ -2,10 +2,14 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import prisma from '../lib/prisma';
+import { sendVerificationEmail } from './emailService';
 
 function getJwtSecret() {
-  // Read at call-time so dotenv load order can't cause mismatches.
-  return process.env.JWT_SECRET || 'default-secret-change-in-production';
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET is not defined in environment variables');
+  }
+  return secret;
 }
 
 export interface SignupData {
@@ -40,19 +44,22 @@ export const signup = async (data: SignupData) => {
 
   // Hash password with bcrypt (10 salt rounds for security)
   const passwordHash = await bcrypt.hash(data.password, 10);
+  const verificationToken = crypto.randomUUID();
 
   const user = await prisma.user.create({
     data: {
-      firstName: data.firstName,
-      lastName: data.lastName,
+      firstName: data.firstName.replace(/<[^>]*>/g, '').trim(),
+      lastName: data.lastName.replace(/<[^>]*>/g, '').trim(),
       email: data.email,
-      passwordHash
+      passwordHash,
+      verificationToken
     },
     select: {
       id: true,
       firstName: true,
       lastName: true,
       email: true,
+      emailVerified: true,
       createdAt: true
     }
   });
@@ -60,7 +67,7 @@ export const signup = async (data: SignupData) => {
   const token = jwt.sign(
     { userId: user.id, email: user.email },
     getJwtSecret(),
-    { expiresIn: '7d' } // Changed to 7d temporarily, usually this would be 1h with refresh
+    { expiresIn: '7d' }
   );
 
   const refreshToken = jwt.sign(
@@ -74,7 +81,89 @@ export const signup = async (data: SignupData) => {
     data: { refreshToken }
   });
 
-  return { user, token, refreshToken };
+  // Send verification email (async, non-blocking)
+  sendVerificationEmail(user.email, verificationToken, user.firstName).catch(() => {});
+
+  return { user, token, refreshToken, verificationToken };
+};
+
+/**
+ * Verify Email Service
+ */
+export const verifyEmail = async (token: string) => {
+  const user = await prisma.user.findUnique({
+    where: { verificationToken: token }
+  });
+
+  if (!user) {
+    throw new Error('Invalid or expired verification token');
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      emailVerified: true,
+      verificationToken: null
+    },
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      email: true,
+      emailVerified: true,
+      createdAt: true
+    }
+  });
+
+  const accessToken = jwt.sign(
+    { userId: updatedUser.id, email: updatedUser.email },
+    getJwtSecret(),
+    { expiresIn: '7d' }
+  );
+
+  const refreshToken = jwt.sign(
+    { userId: updatedUser.id },
+    getJwtSecret(),
+    { expiresIn: '30d' }
+  );
+
+  await prisma.user.update({
+    where: { id: updatedUser.id },
+    data: { refreshToken }
+  });
+
+  return { user: updatedUser, token: accessToken, refreshToken };
+};
+
+/**
+ * Resend Verification Email Service
+ */
+export const resendVerification = async (userId: string) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId }
+  });
+
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  if (user.emailVerified) {
+    throw new Error('Email is already verified');
+  }
+
+  let token = user.verificationToken;
+  if (!token) {
+    token = crypto.randomUUID();
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { verificationToken: token }
+    });
+  }
+
+  // Send verification email
+  sendVerificationEmail(user.email, token, user.firstName).catch(() => {});
+
+  return { message: 'Verification email sent', token };
 };
 
 /**
@@ -126,6 +215,7 @@ export const login = async (data: LoginData) => {
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
+      emailVerified: user.emailVerified,
       createdAt: user.createdAt
     },
     token,
@@ -141,6 +231,7 @@ export const getUserById = async (userId: string) => {
       firstName: true,
       lastName: true,
       email: true,
+      emailVerified: true,
       createdAt: true
     }
   });

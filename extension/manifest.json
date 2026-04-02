@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "LearnTrace",
+  "version": "1.0.0",
+  "description": "Auto-track your learning activity across platforms",
+  "permissions": ["storage", "activeTab", "alarms", "notifications"],
+  "host_permissions": [
+    "https://*.udemy.com/*",
+    "https://*.coursera.org/*",
+    "https://*.youtube.com/*",
+    "https://github.com/*",
+    "https://*.medium.com/*",
+    "https://www.linkedin.com/learning/*",
+    "https://www.freecodecamp.org/*",
+    "https://app.pluralsight.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": ["content.js"],
+    "run_at": "document_idle"
+  }],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "icons": {
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}

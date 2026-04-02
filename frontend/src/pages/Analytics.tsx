@@ -14,9 +14,11 @@ import {
   Area,
 } from 'recharts';
 import { analyticsAPI } from '../utils/api';
-import { LayoutGrid, PieChart as PieIcon, TrendingUp, Cpu, Award } from 'lucide-react';
+import { PieChart as PieIcon, TrendingUp, Cpu, Award, AlertCircle, RefreshCcw } from 'lucide-react';
+import { SkeletonChart } from '../components/Skeleton';
+import { EmptyState } from '../components/EmptyState';
 
-const COLORS = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#6366f1', '#ec4899', '#14b8a6'];
+const COLORS = ['#F59E0B', '#F97316', '#FBBF24', '#EA580C', '#D97706', '#FB923C', '#92400E', '#FED7AA'];
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -38,12 +40,15 @@ export default function Analytics() {
     skills: [] as any[],
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadAnalytics();
   }, []);
 
   const loadAnalytics = async () => {
+    setLoading(true);
+    setError(null);
     try {
       const [domains, trend, platforms, skills] = await Promise.all([
         analyticsAPI.getDomainDistribution(),
@@ -60,6 +65,7 @@ export default function Analytics() {
       });
     } catch (error) {
       console.error('Failed to load analytics', error);
+      setError('Unable to aggregate your learning data. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -67,14 +73,38 @@ export default function Analytics() {
 
   if (loading) {
     return (
-        <div className="max-w-6xl mx-auto space-y-8 animate-pulse pb-20">
-             <div className="h-20 bg-gray-50 rounded-2xl w-1/3" />
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="h-80 bg-gray-50 rounded-2xl" />
-                <div className="h-80 bg-gray-50 rounded-2xl" />
+        <div className="max-w-6xl mx-auto space-y-8 pb-20">
+             <header className="mb-12">
+                <div className="h-10 bg-gray-100 animate-pulse rounded-xl w-48 mb-4" />
+                <div className="h-4 bg-gray-100 animate-pulse rounded-lg w-64" />
+             </header>
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <SkeletonChart />
+                <SkeletonChart />
              </div>
-             <div className="h-96 bg-gray-50 rounded-2xl" />
+             <SkeletonChart />
         </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-xl mx-auto py-20 text-center space-y-6">
+        <div className="h-20 w-20 bg-red-50 rounded-[30px] flex items-center justify-center text-red-500 mx-auto border border-red-100 shadow-sm">
+            <AlertCircle size={40} />
+        </div>
+        <div className="space-y-2">
+            <h2 className="text-2xl font-bold text-gray-900 leading-tight">Analytics Failed</h2>
+            <p className="text-gray-500 text-sm font-medium leading-relaxed">{error}</p>
+        </div>
+        <button
+          onClick={loadAnalytics}
+          className="flex items-center justify-center gap-2 mx-auto bg-gray-900 text-white px-8 py-4 rounded-2xl text-sm font-bold hover:bg-black transition-all shadow-xl shadow-gray-200 active:scale-95"
+        >
+          <RefreshCcw className="h-4 w-4" />
+          Retry Aggregation
+        </button>
+      </div>
     );
   }
 
@@ -82,13 +112,13 @@ export default function Analytics() {
 
   if (isEmpty) {
     return (
-        <div className="max-w-4xl mx-auto py-20 text-center space-y-4">
-            <div className="h-20 w-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto text-blue-600 mb-6">
-                <LayoutGrid className="h-10 w-10" />
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900">No data points yet</h1>
-            <p className="text-gray-500 max-w-sm mx-auto">Start logging your learning milestones to see insights and patterns in your growth.</p>
-        </div>
+      <EmptyState
+          icon="📊"
+          title="No data points yet"
+          description="Continue your education journey to see deep insights into your growth, platform usage, and skill velocity."
+          actionLabel="Log a new milestone"
+          actionHref="/entries/new"
+      />
     );
   }
 
@@ -107,7 +137,7 @@ export default function Analytics() {
                     <h2 className="text-lg font-bold text-gray-900">Domain Distribution</h2>
                     <p className="text-xs text-gray-500 font-medium">Topic-wise breakout of activities</p>
                 </div>
-                <div className="h-10 w-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
+                <div className="h-10 w-10 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600">
                     <PieIcon className="h-5 w-5" />
                 </div>
             </div>
@@ -148,7 +178,7 @@ export default function Analytics() {
                     <h2 className="text-lg font-bold text-gray-900">Platform Usage</h2>
                     <p className="text-xs text-gray-500 font-medium">Where you spend your time</p>
                 </div>
-                <div className="h-10 w-10 bg-purple-50 rounded-xl flex items-center justify-center text-purple-600">
+                <div className="h-10 w-10 bg-orange-50 rounded-xl flex items-center justify-center text-orange-600">
                     <Award className="h-5 w-5" />
                 </div>
             </div>
@@ -158,7 +188,7 @@ export default function Analytics() {
                         <XAxis type="number" hide />
                         <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11, fontWeight: 600, fill: '#6b7280' }} width={80} />
                         <Tooltip cursor={{ fill: '#f9fafb' }} content={<CustomTooltip />} />
-                        <Bar dataKey="value" fill="#8b5cf6" radius={[0, 8, 8, 0]} barSize={24} />
+                        <Bar dataKey="value" fill="#F97316" radius={[0, 8, 8, 0]} barSize={24} />
                     </BarChart>
                 </ResponsiveContainer>
             </div>
@@ -180,15 +210,15 @@ export default function Analytics() {
                     <AreaChart data={analyticsData.trend}>
                         <defs>
                             <linearGradient id="colorTrend" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1}/>
-                                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                                <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.1}/>
+                                <stop offset="95%" stopColor="#F59E0B" stopOpacity={0}/>
                             </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
                         <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#9ca3af', fontWeight: 600 }} dy={10} />
                         <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#9ca3af', fontWeight: 600 }} />
                         <Tooltip content={<CustomTooltip />} />
-                        <Area type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorTrend)" dot={{ r: 4, fill: '#3b82f6', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 6, strokeWidth: 0 }} />
+                        <Area type="monotone" dataKey="value" stroke="#F59E0B" strokeWidth={3} fillOpacity={1} fill="url(#colorTrend)" dot={{ r: 4, fill: '#F59E0B', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 6, strokeWidth: 0 }} />
                     </AreaChart>
                 </ResponsiveContainer>
             </div>
@@ -199,16 +229,16 @@ export default function Analytics() {
             <div className="flex items-center justify-between mb-10">
                 <div className="space-y-1">
                     <h2 className="text-xl font-bold">Skill Frequency</h2>
-                    <p className="text-xs text-blue-400 font-bold uppercase tracking-widest">Most frequently tagged competencies</p>
+                    <p className="text-xs text-amber-500 font-bold uppercase tracking-widest">Most frequently tagged competencies</p>
                 </div>
-                <Cpu className="h-8 w-8 text-blue-500 opacity-50" />
+                <Cpu className="h-8 w-8 text-amber-500 opacity-50" />
             </div>
             <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={analyticsData.skills}>
                         <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 10, fontWeight: 700 }} />
                         <Tooltip cursor={{ fill: 'rgba(255,255,255,0.05)' }} content={<CustomTooltip />} />
-                        <Bar dataKey="value" fill="#3b82f6" radius={[6, 6, 0, 0]} barSize={40} />
+                        <Bar dataKey="value" fill="#F59E0B" radius={[6, 6, 0, 0]} barSize={40} />
                     </BarChart>
                 </ResponsiveContainer>
             </div>

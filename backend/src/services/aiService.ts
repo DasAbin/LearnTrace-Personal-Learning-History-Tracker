@@ -1,5 +1,6 @@
 import Groq from 'groq-sdk';
 import prisma from '../lib/prisma';
+import logger from '../lib/logger';
 import * as analyticsService from './analyticsService';
 
 const groq = new Groq({
@@ -66,7 +67,7 @@ Return a JSON object exactly like this:
     const content = completion.choices[0]?.message?.content || '{}';
     return JSON.parse(content);
   } catch (error) {
-    console.error('Extraction failed:', error);
+    logger.error({ url, error }, 'Extraction failed');
     throw new Error('Failed to extract data from URL');
   }
 };
