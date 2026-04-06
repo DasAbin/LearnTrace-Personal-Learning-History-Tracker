@@ -53,7 +53,7 @@ export default function VerifyEmail() {
     };
 
     verifyToken();
-  }, [token, navigate, login]);
+  }, [token, navigate, setSession]);
 
   return (
     <div className="min-h-screen bg-white flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
