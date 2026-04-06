@@ -88,13 +88,17 @@ app.get('/health', async (req, res) => {
 });
 
 
+// Normalise FRONTEND_URL — strip trailing slash so CORS origin comparisons
+// never silently fail (e.g. "https://x.vercel.app/" vs "https://x.vercel.app")
+const FRONTEND_ORIGIN = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '');
+
 // Middleware
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
       imgSrc: ["'self'", "data:", "blob:", "res.cloudinary.com"],
-      connectSrc: ["'self'", process.env.FRONTEND_URL || 'http://localhost:5173'],
+      connectSrc: ["'self'", FRONTEND_ORIGIN],
     },
   },
   crossOriginResourcePolicy: { policy: "cross-origin" },
@@ -116,7 +120,7 @@ app.use(pinoHttp({
 }));
 
 app.use(cors({
-  origin: process.env.FRONTEND_URL,
+  origin: FRONTEND_ORIGIN,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Idempotency-Key'],
   credentials: true
