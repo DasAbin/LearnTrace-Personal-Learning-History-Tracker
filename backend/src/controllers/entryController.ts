@@ -6,14 +6,8 @@ import { asyncHandler } from '../middleware/asyncHandler';
 import logger from '../lib/logger';
 import { v2 as cloudinary } from 'cloudinary';
 import prisma from '../lib/prisma';
-import fs from 'fs';
 import path from 'path';
-
-// Ensure the uploads directory exists before processing any file upload
-const certDir = path.join(__dirname, '../../uploads/certificates');
-if (!fs.existsSync(certDir)) {
-  fs.mkdirSync(certDir, { recursive: true });
-}
+import { uploadToCloudinary } from '../utils/upload';
 
 export const createEntry = [
   body('title').trim().notEmpty().withMessage('Title is required'),
@@ -49,6 +43,15 @@ export const createEntry = [
 
       const hoursSpent = req.body.hoursSpent ? parseInt(req.body.hoursSpent, 10) : undefined;
       
+      // Handle certificate upload
+      let certificatePath: string | undefined;
+      if (req.file) {
+        logger.info({ filename: req.file.filename, path: req.file.path, mimetype: req.file.mimetype }, '📎 Certificate file received');
+        // Try Cloudinary first, fall back to local path
+        const cloudUrl = await uploadToCloudinary(req.file.path, userId);
+        certificatePath = cloudUrl || `/uploads/certificates/${path.basename(req.file.path)}`;
+      }
+
       const data = {
         title: req.body.title,
         platform: req.body.platform,
@@ -64,9 +67,7 @@ export const createEntry = [
         difficulty: req.body.difficulty || undefined,
         rating: req.body.rating ? parseInt(req.body.rating, 10) : undefined,
         resourceUrl: req.body.resourceUrl || undefined,
-        certificatePath: req.file
-          ? (req.file.path.startsWith('http') ? req.file.path : `/uploads/certificates/${path.basename(req.file.path)}`)
-          : undefined
+        certificatePath,
       };
 
       const idempotencyKey = req.headers['idempotency-key'] as string;
@@ -196,9 +197,9 @@ export const updateEntry = [
       if (req.body.resourceUrl !== undefined) data.resourceUrl = req.body.resourceUrl || undefined;
       
       if (req.file) {
-        data.certificatePath = req.file.path.startsWith('http')
-          ? req.file.path
-          : `/uploads/certificates/${path.basename(req.file.path)}`;
+        logger.info({ filename: req.file.filename, path: req.file.path, mimetype: req.file.mimetype }, '📎 Certificate file received (update)');
+        const cloudUrl = await uploadToCloudinary(req.file.path, userId);
+        data.certificatePath = cloudUrl || `/uploads/certificates/${path.basename(req.file.path)}`;
         
         // If req.file exists AND existing entry has a certificatePath, delete the old file
         if (existingEntry?.certificatePath) {
