@@ -203,3 +203,5 @@ const startServer = () => {
     logger.info({ port: PORT, frontendUrl: process.env.FRONTEND_URL }, '🚀 Server started successfully');
   });
 };
+
+startServer();
