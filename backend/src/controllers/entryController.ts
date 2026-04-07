@@ -6,6 +6,7 @@ import { asyncHandler } from '../middleware/asyncHandler';
 import logger from '../lib/logger';
 import { v2 as cloudinary } from 'cloudinary';
 import prisma from '../lib/prisma';
+import fs from 'fs';
 import path from 'path';
 import { uploadToCloudinary } from '../utils/upload';
 
