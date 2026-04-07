@@ -177,32 +177,24 @@ app.use('/api/v1', apiRouter);
 // Error handler
 app.use(errorHandler);
 
-const startServer = async () => {
-  try {
-    // Check database connection before starting the server
-    await prisma.$connect();
-    logger.info('📦 Connected to database successfully.');
+const startServer = () => {
+  // Prisma manages connection pooling lazily — no explicit $connect() needed.
+  // The server starts immediately; DB connections are established on first query.
 
-    // Start 24h idempotency key cleanup job
-    setInterval(async () => {
-      try {
-        const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-        await prisma.idempotencyKey.deleteMany({
-          where: { createdAt: { lt: oneDayAgo } }
-        });
-        logger.info('🧹 Cleaned up old idempotency keys');
-      } catch (error) {
-        logger.error({ error }, '❌ Failed to clean up idempotency keys');
-      }
-    }, 24 * 60 * 60 * 1000);
+  // Start 24h idempotency key cleanup job
+  setInterval(async () => {
+    try {
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      await prisma.idempotencyKey.deleteMany({
+        where: { createdAt: { lt: oneDayAgo } }
+      });
+      logger.info('🧹 Cleaned up old idempotency keys');
+    } catch (error) {
+      logger.error({ error }, '❌ Failed to clean up idempotency keys');
+    }
+  }, 24 * 60 * 60 * 1000);
 
-    app.listen(PORT, () => {
-      logger.info({ port: PORT, frontendUrl: process.env.FRONTEND_URL }, '🚀 Server started successfully');
-    });
-  } catch (error) {
-    logger.error({ error }, '❌ Failed to connect to the database. Please check your DATABASE_URL configuration.');
-    process.exit(1);
-  }
+  app.listen(PORT, () => {
+    logger.info({ port: PORT, frontendUrl: process.env.FRONTEND_URL }, '🚀 Server started successfully');
+  });
 };
-
-startServer();
