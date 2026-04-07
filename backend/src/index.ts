@@ -90,7 +90,16 @@ app.get('/health', async (req, res) => {
 
 // Normalise FRONTEND_URL — strip trailing slash so CORS origin comparisons
 // never silently fail (e.g. "https://x.vercel.app/" vs "https://x.vercel.app")
-const FRONTEND_ORIGIN = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '');
+const FRONTEND_ORIGIN = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/+$/, '');
+logger.info({ FRONTEND_ORIGIN, raw: process.env.FRONTEND_URL }, '🌐 CORS origin configured');
+
+// CORS must be applied BEFORE helmet so OPTIONS preflight is handled first
+app.use(cors({
+  origin: FRONTEND_ORIGIN,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Idempotency-Key'],
+  credentials: true
+}));
 
 // Middleware
 app.use(helmet({
@@ -115,15 +124,6 @@ app.use(pinoHttp({
   customProps: (req) => ({ 
     userId: (req as any).userId 
   }),
-  // Clean up logs by filtering out simple health checks if needed, 
-  // but for now, we keep everything.
-}));
-
-app.use(cors({
-  origin: FRONTEND_ORIGIN,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Idempotency-Key'],
-  credentials: true
 }));
 
 app.use(express.json());
