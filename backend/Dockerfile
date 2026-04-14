@@ -50,4 +50,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
   CMD wget -qO- http://localhost:3001/health || exit 1
 
 # Run db push then start, forcing .env creation to bypass Alpine env stripping issues
-CMD ["sh", "-c", "echo DATABASE_URL=\\"$DATABASE_URL\\" > prisma/.env && npx prisma db push --accept-data-loss && node dist/index.js"]
+CMD echo "DATABASE_URL=$DATABASE_URL" > prisma/.env && npx prisma db push --accept-data-loss && node dist/index.js
