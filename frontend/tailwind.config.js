@@ -7,21 +7,21 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#F59E0B',
+        brand: {
+          dark: '#0F0E0C',
+          light: '#FAFAF7',
+          gold: '#C9A84C',
+          text: '#F5F0E8',
+        },
+        primary: '#C9A84C',
         'success-green': '#10B981',
         'soft-purple': '#8B5CF6',
         'warm-orange': '#F97316',
         'alert-red': '#EF4444',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-      },
-      borderRadius: {
-        'card': '12px',
-        'button': '10px',
-      },
-      boxShadow: {
-        'soft': '0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04)',
+        sans: ['"DM Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+        serif: ['"Playfair Display"', 'Georgia', 'serif'],
       },
     },
   },

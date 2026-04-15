@@ -11,7 +11,6 @@ import {
   LogOut,
   Plus,
   GraduationCap,
-  Users,
   ChevronLeft,
   ChevronRight,
   Menu,
@@ -46,57 +45,55 @@ export const Layout = ({ children }: LayoutProps) => {
     { path: '/profile', icon: Settings, label: 'Profile' },
   ];
 
+  /* 
+   * Bugfix: Removed generic 'Classroom' route to ensure admins
+   * access classes via specific parameterized Dashboard cards.
+   */
   const adminNav = [
     { path: '/admin/dashboard', icon: LayoutDashboard, label: 'Overview' },
-    { path: '/admin/classroom', icon: Users, label: 'Classroom', matchPrefix: true },
   ];
 
   const navItems = isAdmin ? adminNav : studentNav;
 
   const isActive = (item: typeof navItems[0]) => {
-    if ((item as any).matchPrefix) {
-      return location.pathname.startsWith(item.path);
-    }
     return location.pathname === item.path;
   };
 
   const SidebarContent = () => (
     <>
-      {/* Logo */}
-      <div className="px-4 py-5 border-b border-gray-100 flex items-center justify-between">
-        <Link to={isAdmin ? '/admin/dashboard' : '/dashboard'} className="flex items-center gap-2.5">
-          <div className="h-9 w-9 bg-amber-500 rounded-xl flex items-center justify-center flex-shrink-0">
-            <BookOpen className="h-4.5 w-4.5 text-white" />
+      {/* Structural Headers with Playfair */}
+      <div className="px-6 py-8 border-b border-[#C9A84C]/20 flex items-center justify-between">
+        <Link to={isAdmin ? '/admin/dashboard' : '/dashboard'} className="flex items-center gap-4">
+          <div className="h-8 w-8 flex items-center justify-center flex-shrink-0">
+            <BookOpen className="h-5 w-5 text-brand-gold" />
           </div>
           {!sidebarCollapsed && (
-            <span className="text-lg font-bold text-gray-900 tracking-tight">LearnTrace</span>
+            <span className="text-xl font-serif text-brand-text tracking-widest uppercase">LearnTrace</span>
           )}
         </Link>
-        {/* Mobile close */}
-        <button onClick={() => setMobileOpen(false)} className="lg:hidden p-1.5 hover:bg-gray-100 rounded-lg">
-          <XIcon className="h-5 w-5 text-gray-500" />
+        <button onClick={() => setMobileOpen(false)} className="lg:hidden p-2">
+          <XIcon className="h-5 w-5 text-brand-text" />
         </button>
       </div>
 
-      {/* Add Entry (Student only) */}
       {!isAdmin && (
-        <div className="px-3 pt-4">
+        <div className="px-4 pt-6">
           <Link
             to="/entries/new"
-            className={`flex items-center gap-2.5 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition-all shadow-lg shadow-gray-900/10 active:scale-[0.98] ${
-              sidebarCollapsed ? 'justify-center p-3' : 'px-4 py-3'
+            className={`flex items-center gap-3 border border-brand-gold text-brand-gold hover:bg-brand-gold hover:text-brand-dark transition-colors duration-200 ${
+              sidebarCollapsed ? 'justify-center p-4' : 'px-6 py-4'
             }`}
           >
-            <Plus className="h-4 w-4 flex-shrink-0" />
-            {!sidebarCollapsed && <span className="text-sm font-bold">Add Entry</span>}
+            <Plus className="h-5 w-5 flex-shrink-0" />
+            {!sidebarCollapsed && <span className="text-sm uppercase tracking-widest font-semibold">Log Entry</span>}
           </Link>
         </div>
       )}
 
-      {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+      {/* Navigation Space */}
+      <nav className="flex-1 px-4 py-8 space-y-4 overflow-y-auto">
         {isAdmin && !sidebarCollapsed && (
-          <p className="px-3 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Administration</p>
+          <p className="px-4 py-2 text-xs font-serif text-[#C9A84C] uppercase tracking-[0.2em]">Registry</p>
         )}
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -106,47 +103,45 @@ export const Layout = ({ children }: LayoutProps) => {
               key={item.path}
               to={item.path}
               onClick={() => setMobileOpen(false)}
-              className={`flex items-center gap-3 rounded-xl transition-all ${
-                sidebarCollapsed ? 'justify-center p-3' : 'px-3 py-2.5'
+              className={`flex items-center gap-4 rounded-md transition-all ${
+                sidebarCollapsed ? 'justify-center p-4' : 'px-4 py-4'
               } ${
                 active
-                  ? 'bg-amber-50 text-amber-700 font-bold'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 font-medium'
+                  ? 'border border-[#C9A84C] text-[#C9A84C]'
+                  : 'text-brand-text/60 border border-transparent hover:border-[#C9A84C]/30 hover:text-brand-text'
               }`}
               title={sidebarCollapsed ? item.label : undefined}
             >
-              <Icon className={`h-[18px] w-[18px] flex-shrink-0 ${active ? 'text-amber-600' : ''}`} />
-              {!sidebarCollapsed && <span className="text-sm">{item.label}</span>}
+              <Icon className="h-5 w-5 flex-shrink-0" />
+              {!sidebarCollapsed && <span className="text-sm uppercase tracking-widest">{item.label}</span>}
             </Link>
           );
         })}
       </nav>
 
-      {/* User Footer */}
-      <div className="border-t border-gray-100 p-3">
-        <div className={`flex items-center gap-3 ${sidebarCollapsed ? 'justify-center' : ''}`}>
-          <div className={`h-9 w-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0 ${
-            isAdmin ? 'bg-amber-500' : 'bg-gray-900'
-          }`}>
+      {/* User Footer flat border styling */}
+      <div className="border-t border-[#C9A84C]/20 p-5">
+        <div className={`flex items-center gap-4 ${sidebarCollapsed ? 'justify-center' : ''}`}>
+          <div className="h-10 w-10 border border-[#C9A84C] flex items-center justify-center text-brand-gold text-sm font-semibold flex-shrink-0 font-serif">
             {user?.firstName?.[0]}{user?.lastName?.[0]}
           </div>
           {!sidebarCollapsed && (
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-gray-900 truncate">
+              <p className="text-sm font-semibold text-brand-text truncate font-serif">
                 {user?.firstName} {user?.lastName}
               </p>
-              <p className="text-xs text-gray-400 font-medium truncate flex items-center gap-1">
+              <p className="text-xs text-brand-text/50 uppercase tracking-widest truncate mt-1 flex items-center gap-2">
                 {isAdmin ? (
-                  <><GraduationCap className="h-3 w-3" /> Admin</>
+                  <><GraduationCap className="h-3 w-3" /> Dean</>
                 ) : (
-                  <><>{user?.collegeName || user?.email}</>{' '}</>
+                  <>{user?.collegeName || user?.email}</>
                 )}
               </p>
             </div>
           )}
           <button
             onClick={handleLogout}
-            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all flex-shrink-0"
+            className="p-3 text-brand-text/50 hover:text-brand-gold hover:border hover:border-brand-gold transition-all flex-shrink-0"
             title="Logout"
           >
             <LogOut className="h-4 w-4" />
@@ -154,57 +149,50 @@ export const Layout = ({ children }: LayoutProps) => {
         </div>
       </div>
 
-      {/* Collapse Toggle (desktop) */}
       <button
         onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-        className="hidden lg:flex absolute -right-3 top-20 h-6 w-6 bg-white border border-gray-200 rounded-full items-center justify-center shadow-sm hover:bg-gray-50 transition-colors"
+        className="hidden lg:flex absolute -right-4 top-24 h-8 w-8 bg-brand-dark border border-[#C9A84C] items-center justify-center hover:bg-[#C9A84C] hover:text-brand-dark text-brand-gold transition-colors z-50"
       >
         {sidebarCollapsed ? (
-          <ChevronRight className="h-3 w-3 text-gray-500" />
+          <ChevronRight className="h-4 w-4 " />
         ) : (
-          <ChevronLeft className="h-3 w-3 text-gray-500" />
+          <ChevronLeft className="h-4 w-4 " />
         )}
       </button>
     </>
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Desktop Sidebar */}
-      <aside className={`hidden lg:flex flex-col bg-white border-r border-gray-200 relative transition-all duration-300 ${
-        sidebarCollapsed ? 'w-[72px]' : 'w-[250px]'
+    <div className="min-h-screen bg-brand-dark text-brand-text flex font-sans">
+      <aside className={`hidden lg:flex flex-col bg-brand-dark border-r border-[#C9A84C]/20 relative transition-all duration-300 ${
+        sidebarCollapsed ? 'w-[88px]' : 'w-[320px]'
       }`}>
         <SidebarContent />
       </aside>
 
-      {/* Mobile Sidebar Overlay */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/30" onClick={() => setMobileOpen(false)} />
-          <aside className="absolute left-0 top-0 bottom-0 w-[280px] bg-white flex flex-col shadow-xl">
+          <div className="absolute inset-0 bg-[#0F0E0C]/80" onClick={() => setMobileOpen(false)} />
+          <aside className="absolute left-0 top-0 bottom-0 w-[300px] bg-brand-dark border-r border-[#C9A84C] flex flex-col">
             <SidebarContent />
           </aside>
         </div>
       )}
 
-      {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Mobile Header */}
-        <header className="lg:hidden bg-white border-b border-gray-200 px-4 h-14 flex items-center justify-between">
-          <button onClick={() => setMobileOpen(true)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-            <Menu className="h-5 w-5 text-gray-700" />
+        <header className="lg:hidden bg-brand-dark border-b border-[#C9A84C]/20 px-6 h-20 flex items-center justify-between">
+          <button onClick={() => setMobileOpen(true)} className="p-3 border border-brand-gold text-brand-gold">
+            <Menu className="h-5 w-5" />
           </button>
-          <div className="flex items-center gap-2">
-            <div className="h-7 w-7 bg-amber-500 rounded-lg flex items-center justify-center">
-              <BookOpen className="h-3.5 w-3.5 text-white" />
-            </div>
-            <span className="font-bold text-gray-900">LearnTrace</span>
+          <div className="flex items-center gap-3">
+            <BookOpen className="h-5 w-5 text-brand-gold" />
+            <span className="font-serif text-xl tracking-widest uppercase">LearnTrace</span>
           </div>
-          <div className="w-9" /> {/* Balance spacer */}
+          <div className="w-12" />
         </header>
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
-          <div className="max-w-7xl mx-auto">
+        <main className="flex-1 p-6 sm:p-10 lg:p-12 overflow-y-auto bg-brand-dark">
+          <div className="max-w-[1400px] mx-auto">
             {children}
           </div>
         </main>
