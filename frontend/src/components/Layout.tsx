@@ -48,6 +48,7 @@ export const Layout = ({ children }: LayoutProps) => {
 
   const adminNav = [
     { path: '/admin/dashboard', icon: LayoutDashboard, label: 'Overview' },
+    { path: '/admin/classroom', icon: Users, label: 'Classroom', matchPrefix: true },
   ];
 
   const navItems = isAdmin ? adminNav : studentNav;
