@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-import { ProtectedRoute } from './components/ProtectedRoute';
+import { ProtectedRoute, AdminRoute } from './components/ProtectedRoute';
 import { Layout } from './components/Layout';
 import ErrorBoundary from './components/ErrorBoundary';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -28,6 +28,7 @@ import Analytics from './pages/Analytics';
 import Heatmap from './pages/Heatmap';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import ClassroomIndex from './pages/admin/ClassroomIndex';
 import ClassroomView from './pages/admin/ClassroomView';
 
 function App() {
@@ -63,8 +64,9 @@ function App() {
                           <Route path="/profile" element={<Profile />} />
 
                           {/* Admin routes */}
-                          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                          <Route path="/admin/classroom/:className" element={<ClassroomView />} />
+                          <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+                          <Route path="/admin/classroom" element={<AdminRoute><ClassroomIndex /></AdminRoute>} />
+                          <Route path="/admin/classroom/:className" element={<AdminRoute><ClassroomView /></AdminRoute>} />
 
                           {/* Default redirect */}
                           <Route path="/" element={<Navigate to="/dashboard" replace />} />

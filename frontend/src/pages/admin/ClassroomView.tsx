@@ -3,8 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import { adminAPI } from '../../utils/api';
 import type { StudentSummary, StudentDetail } from '../../types';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Text, Environment, useGLTF, ContactShadows } from '@react-three/drei';
-import { ArrowLeft, Loader2, X, BookOpen, Clock, Award, Users } from 'lucide-react';
+import { OrbitControls, Text, Environment, useGLTF, ContactShadows, Html } from '@react-three/drei';
+import { ArrowLeft, Loader2, X, BookOpen, Clock, Award, Users, Info } from 'lucide-react';
 import * as THREE from 'three';
 import { SkeletonUtils } from 'three-stdlib';
 
@@ -17,7 +17,8 @@ function StudentAvatar({ student, index, total, onClick, isSelected }: {
   student: StudentSummary; index: number; total: number; onClick: () => void; isSelected: boolean;
 }) {
   const group = useRef<THREE.Group>(null);
-  const isMale = student.gender !== 'female';
+  const gender = (student.gender || '').toLowerCase();
+  const isMale = gender !== 'female';
   
   // Conditionally load the exact model
   const { scene } = useGLTF(isMale ? '/Boy.glb' : '/Girl.glb') as any;
@@ -77,7 +78,7 @@ function StudentAvatar({ student, index, total, onClick, isSelected }: {
         color={isSelected ? "#3b82f6" : "#ffffff"}
         anchorX="center"
         anchorY="middle"
-        font="https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZ9hjQ.woff2"
+        font="/fonts/Inter.woff2"
         outlineWidth={0.02}
         outlineColor={isSelected ? "#ffffff" : "#1f2937"}
       >
@@ -90,7 +91,7 @@ function StudentAvatar({ student, index, total, onClick, isSelected }: {
         color={isSelected ? "#93c5fd" : "#9ca3af"}
         anchorX="center"
         anchorY="middle"
-        font="https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZ9hjQ.woff2"
+        font="/fonts/Inter.woff2"
         outlineWidth={0.015}
         outlineColor="#111827"
       >
@@ -104,12 +105,23 @@ function StudentAvatar({ student, index, total, onClick, isSelected }: {
             <meshBasicMaterial color={isSelected ? "#3b82f6" : "#10b981"} />
           </mesh>
           <Text position={[0, 0, 0.01]} fontSize={0.12} color="white" anchorX="center" anchorY="middle"
-            font="https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZ9hjQ.woff2">
+            font="/fonts/Inter.woff2">
             {student.entryCount}
           </Text>
         </group>
       )}
     </group>
+  );
+}
+
+function LoadingPlaceholder() {
+  return (
+    <Html center>
+      <div className="flex flex-col items-center gap-4 bg-gray-900/80 backdrop-blur-xl px-8 py-6 rounded-3xl border border-white/10 shadow-2xl">
+        <Loader2 className="h-8 w-8 text-blue-500 animate-spin" />
+        <p className="text-sm font-bold text-gray-400 tracking-widest uppercase">Initialising neural nodes...</p>
+      </div>
+    </Html>
   );
 }
 
@@ -307,8 +319,9 @@ export default function ClassroomView() {
     <div className="relative space-y-6">
       {/* Stitch Neural-Architect Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 bg-gradient-to-r from-gray-900 to-[#131317] p-8 rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden">
-        {/* Background photographic abstraction */}
-        <div className="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1639322537228-f710d846310a?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center mix-blend-overlay"></div>
+        {/* Procedural Grid Background Replacement */}
+        <div className="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-pink-500/5"></div>
         
         <div className="relative flex items-end gap-6">
           <Link to="/admin/dashboard"
@@ -339,14 +352,14 @@ export default function ClassroomView() {
         </div>
       ) : (
         /* Thematic 3D Canvas Void */
-        <div className="relative rounded-3xl overflow-hidden border border-gray-800 shadow-2xl bg-[#0b0c10]" style={{ height: '700px' }}>
+        <div className="relative rounded-3xl overflow-hidden border border-gray-800 shadow-2xl bg-[#0b0c10]" style={{ height: 'clamp(400px, 70vh, 800px)' }}>
           
           <Canvas
             shadows
             camera={{ position: [0, 6, 14], fov: 45 }}
             className="cursor-move"
           >
-            <Suspense fallback={null}>
+            <Suspense fallback={<LoadingPlaceholder />}>
               <color attach="background" args={['#050810']} />
               <fog attach="fog" args={['#050810', 10, 40]} />
               
@@ -409,6 +422,18 @@ export default function ClassroomView() {
                   </div>
                   <span className="text-xs text-gray-300 font-bold uppercase tracking-wide">Telemetry Logs</span>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="absolute bottom-6 right-6 pointer-events-none">
+            <div className="bg-[#1a1b24]/80 backdrop-blur-xl rounded-2xl px-6 py-4 border border-white/10 shadow-2xl flex items-center gap-3">
+              <div className="h-8 w-8 rounded-full bg-blue-500/20 border border-blue-500/40 flex items-center justify-center">
+                <Info className="h-4 w-4 text-blue-400" />
+              </div>
+              <div>
+                <p className="text-[10px] font-black text-gray-500 tracking-widest uppercase">Interaction Hint</p>
+                <p className="text-xs text-white font-bold">Click a node to view telemetry</p>
               </div>
             </div>
           </div>

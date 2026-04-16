@@ -62,7 +62,7 @@ export default function Signup() {
         className: className || undefined,
         rollNumber: rollNumber || undefined,
       });
-      navigate('/dashboard');
+      navigate(role === 'ADMIN' ? '/admin/dashboard' : '/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.error || err.response?.data?.errors?.[0]?.msg || 'Failed to sign up');
     } finally {
