@@ -20,8 +20,9 @@ function StudentAvatar({ student, index, total, onClick, isSelected }: {
   const gender = (student.gender || '').toLowerCase();
   const isMale = gender !== 'female';
   
-  // Conditionally load the exact model
-  const { scene } = useGLTF(isMale ? '/Boy.glb' : '/Girl.glb') as any;
+  // Conditionally load the exact model with safety check
+  const modelUrl = isMale ? '/Boy.glb' : '/Girl.glb';
+  const { scene } = useGLTF(modelUrl) as any;
   
   // Clone the scene graph using SkeletonUtils to reuse memory across multiple student avatars
   const clone = useMemo(() => SkeletonUtils.clone(scene), [scene]);
@@ -358,6 +359,7 @@ export default function ClassroomView() {
             shadows
             camera={{ position: [0, 6, 14], fov: 45 }}
             className="cursor-move"
+            onError={(e) => console.error('Canvas Error:', e)}
           >
             <Suspense fallback={<LoadingPlaceholder />}>
               <color attach="background" args={['#050810']} />
