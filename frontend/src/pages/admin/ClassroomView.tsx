@@ -54,12 +54,15 @@ function StudentAvatar({
   const modelUrl = isMale ? '/Boy.glb' : '/Girl.glb';
 
   const { scene } = useGLTF(modelUrl) as any;
+  console.log(`🔷 Avatar status for ${student.firstName}: scene? ${!!scene}`);
 
   // Clone + normalise so baked scale=100 is cancelled out
   const clone = useMemo(() => {
+    if (!scene) return null;
+    console.log(`🔷 Normalising avatar for ${student.firstName}...`);
     const c = SkeletonUtils.clone(scene) as THREE.Group;
     return normaliseClone(c);
-  }, [scene]);
+  }, [scene, student.firstName]);
 
   // Grid layout
   const cols = Math.min(total, 6);
@@ -125,7 +128,6 @@ function StudentAvatar({
         color={isSelected ? '#3b82f6' : '#ffffff'}
         anchorX="center"
         anchorY="middle"
-        font="https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/inter/Inter%5Bslnt%2Cwght%5D.ttf"
         outlineWidth={0.018}
         outlineColor={isSelected ? '#ffffff' : '#1f2937'}
       >
@@ -138,7 +140,6 @@ function StudentAvatar({
         color={isSelected ? '#93c5fd' : '#9ca3af'}
         anchorX="center"
         anchorY="middle"
-        font="https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/inter/Inter%5Bslnt%2Cwght%5D.ttf"
         outlineWidth={0.012}
         outlineColor="#111827"
       >
@@ -158,7 +159,6 @@ function StudentAvatar({
             color="white"
             anchorX="center"
             anchorY="middle"
-            font="https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/inter/Inter%5Bslnt%2Cwght%5D.ttf"
           >
             {student.entryCount}
           </Text>
@@ -417,10 +417,16 @@ export default function ClassroomView() {
             shadows
             dpr={[1, 2]}
             camera={{ position: [0, camY, camZ], fov: 45 }}
-            gl={{ antialias: true, alpha: false, preserveDrawingBuffer: false }}
+            gl={{ 
+              antialias: true, 
+              alpha: false, 
+              preserveDrawingBuffer: false,
+              powerPreference: 'high-performance'
+            }}
             onCreated={({ gl }) => {
               gl.setClearColor('#050810');
             }}
+            onPointerMissed={() => setSelectedStudentId(null)}
           >
             <Suspense fallback={<LoadingPlaceholder />}>
               <color attach="background" args={['#050810']} />
