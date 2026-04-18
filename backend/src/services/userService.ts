@@ -80,3 +80,9 @@ export const updatePublicProfileId = async (userId: string, publicProfileId: str
     }
   });
 };
+
+export const deleteUser = async (userId: string) => {
+  return prisma.user.delete({
+    where: { id: userId }
+  });
+};

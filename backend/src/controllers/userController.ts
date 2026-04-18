@@ -37,3 +37,13 @@ export const updatePublicProfileId = async (req: AuthRequest, res: Response) => 
     res.status(400).json({ error: error.message });
   }
 };
+
+export const deleteProfile = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.userId!;
+    await userService.deleteUser(userId);
+    res.json({ message: 'User deleted successfully' });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Download, LogOut, User as UserIcon, Mail, Shield, Database, Activity, Trophy, Code, Info } from 'lucide-react';
+import { Download, LogOut, User as UserIcon, Mail, Shield, Database, Activity, Trophy, Code, Info, Trash2, AlertTriangle } from 'lucide-react';
 import { analyticsAPI, userAPI } from '../utils/api';
 import { DashboardSummary } from '../types';
 // date-fns format import removed as it was unused in this version
@@ -9,6 +9,7 @@ export default function Profile() {
   const { user, logout } = useAuth();
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [exporting, setExporting] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -34,6 +35,22 @@ export default function Profile() {
       alert('Failed to export data. Please try again.');
     } finally {
       setExporting(null);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!window.confirm('Are you absolutely sure you want to delete your account? This action is permanent and all your learning history and records will be deleted forever.')) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      await userAPI.deleteProfile();
+      logout();
+    } catch (error) {
+      console.error('Failed to delete account', error);
+      alert('Failed to delete account. Please try again or contact support.');
+      setIsDeleting(false);
     }
   };
 
@@ -169,6 +186,30 @@ export default function Profile() {
                 >
                     <LogOut className="h-4 w-4" />
                     Logout
+                </button>
+            </div>
+
+            <div className="bg-red-50/30 rounded-[32px] border border-red-100 p-8 space-y-6">
+                <div className="flex items-center gap-3 text-red-600">
+                    <AlertTriangle className="h-5 w-5" />
+                    <h3 className="text-sm font-bold uppercase tracking-widest">Danger Zone</h3>
+                </div>
+                <p className="text-xs text-red-800/60 leading-relaxed font-medium">
+                    Permanently delete your account and all your data. This action is irreversible.
+                </p>
+                <button
+                    onClick={handleDeleteAccount}
+                    disabled={isDeleting}
+                    className="w-full flex items-center justify-center gap-3 py-4 bg-white border border-red-200 text-red-600 font-bold rounded-2xl hover:bg-red-600 hover:text-white hover:border-red-600 transition-all active:scale-95 disabled:opacity-50 group"
+                >
+                    {isDeleting ? (
+                        <span className="h-4 w-4 border-2 border-red-200 border-t-red-600 rounded-full animate-spin" />
+                    ) : (
+                        <>
+                            <Trash2 className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                            Delete Account
+                        </>
+                    )}
                 </button>
             </div>
 

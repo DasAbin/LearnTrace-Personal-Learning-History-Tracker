@@ -204,6 +204,9 @@ export const userAPI = {
     link.remove();
     window.URL.revokeObjectURL(url);
   },
+  deleteProfile: async (): Promise<void> => {
+    await api.delete('/users/profile');
+  },
 };
 
 export default api;

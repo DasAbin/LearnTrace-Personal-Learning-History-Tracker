@@ -177,6 +177,7 @@ apiRouter.get('/analytics/heatmap', authenticate, analyticsController.getHeatmap
 apiRouter.get('/users/export', authenticate, userController.exportData);
 apiRouter.get('/portfolio/:publicId', userController.getPortfolio);
 apiRouter.put('/users/public-profile', authenticate, userController.updatePublicProfileId);
+apiRouter.delete('/users/profile', authenticate, userController.deleteProfile);
 
 // AI routes
 apiRouter.post('/entries/:id/generate-bullets', authenticate, aiController.generateBullets);
