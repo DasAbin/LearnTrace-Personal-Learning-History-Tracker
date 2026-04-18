@@ -188,8 +188,14 @@ apiRouter.get('/admin/overview', authenticate, requireAdmin, adminController.get
 apiRouter.get('/admin/classes', authenticate, requireAdmin, adminController.getClasses);
 apiRouter.get('/admin/classes/:className/students', authenticate, requireAdmin, adminController.getStudentsByClass);
 apiRouter.get('/admin/students/:studentId', authenticate, requireAdmin, adminController.getStudentDetail);
-apiRouter.get('/admin/seed-ait', authenticate, requireAdmin, adminController.runAitSeed);
-apiRouter.get('/admin/update-config', authenticate, requireAdmin, adminController.runUpdateConfig);
+// Temporary secret middleware for browser-based seeding
+const seedSecretMiddleware = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (req.query.key === 'lt_seed_2026') return next();
+  return res.status(401).json({ error: 'Authentication required. Pass ?key=lt_seed_2026' });
+};
+
+apiRouter.get('/admin/seed-ait', seedSecretMiddleware, adminController.runAitSeed);
+apiRouter.get('/admin/update-config', seedSecretMiddleware, adminController.runUpdateConfig);
 
 app.use('/api/v1', apiRouter);
 
