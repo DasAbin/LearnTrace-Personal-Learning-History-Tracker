@@ -188,6 +188,8 @@ apiRouter.get('/admin/overview', authenticate, requireAdmin, adminController.get
 apiRouter.get('/admin/classes', authenticate, requireAdmin, adminController.getClasses);
 apiRouter.get('/admin/classes/:className/students', authenticate, requireAdmin, adminController.getStudentsByClass);
 apiRouter.get('/admin/students/:studentId', authenticate, requireAdmin, adminController.getStudentDetail);
+apiRouter.get('/admin/seed-ait', authenticate, requireAdmin, adminController.runAitSeed);
+apiRouter.get('/admin/update-config', authenticate, requireAdmin, adminController.runUpdateConfig);
 
 app.use('/api/v1', apiRouter);
 
