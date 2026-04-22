@@ -137,7 +137,7 @@ export const Layout = ({ children }: LayoutProps) => {
               </p>
               <p className="text-xs text-gray-400 font-medium truncate flex items-center gap-1">
                 {isAdmin ? (
-                  <><GraduationCap className="h-3 w-3" /> Admin</>
+                  <><GraduationCap className="h-3 w-3" /> {user?.role === 'HOD' ? 'Head of Dept' : user?.role === 'TEACHER' ? 'Teacher' : 'Admin'}</>
                 ) : (
                   <><>{user?.collegeName || user?.email}</>{' '}</>
                 )}

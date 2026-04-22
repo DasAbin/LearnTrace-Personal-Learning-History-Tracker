@@ -29,6 +29,16 @@
     background-color: #fef3c7;
     color: #92400e;
   }
+
+  /* Hide browser-native password reveal toggle (Edge, Chrome, Safari) */
+  input[type="password"]::-ms-reveal,
+  input[type="password"]::-ms-clear,
+  input[type="password"]::-webkit-credentials-auto-fill-button,
+  input::-webkit-password-toggle-visibility-button {
+    display: none !important;
+    -webkit-appearance: none;
+    appearance: none;
+  }
 }
 
 @layer components {

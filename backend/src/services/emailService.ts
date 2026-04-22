@@ -20,7 +20,7 @@ if (SENDGRID_CONFIGURED) {
   transport = 'sendgrid';
   logger.info('✅ SendGrid configured — emails will be sent via SendGrid HTTP API.');
 } else if (SMTP_CONFIGURED) {
-  const t = nodemailer.createTransport({
+  smtpTransporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: parseInt(process.env.SMTP_PORT || '587', 10),
     secure: process.env.SMTP_PORT === '465',
@@ -30,16 +30,12 @@ if (SENDGRID_CONFIGURED) {
     },
     connectionTimeout: 5000,
   });
+  transport = 'smtp';
 
-  t.verify()
-    .then(() => {
-      smtpTransporter = t;
-      transport = 'smtp';
-      logger.info('✅ SMTP connected — email sending is active.');
-    })
-    .catch((error) => {
-      logger.info({ error }, '❌ SMTP connection failed. Emails will be logged to console.');
-    });
+  // Verify SMTP connection in background (non-blocking)
+  smtpTransporter.verify()
+    .then(() => logger.info('✅ SMTP connected — email sending is active.'))
+    .catch((error) => logger.info({ error }, '⚠️ SMTP verify failed — will still attempt to send.'));
 } else {
   logger.warn('⚠️ No email service configured (SENDGRID_API_KEY or SMTP_*). Emails will be logged to console.');
 }
@@ -50,25 +46,26 @@ const FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || process.env.SMTP_FROM || p
 // ── Send helper ───────────────────────────────────────────────────────
 
 async function sendEmail(to: string, subject: string, html: string): Promise<boolean> {
-  if (transport === 'sendgrid') {
+  // Try SendGrid first
+  if (SENDGRID_CONFIGURED) {
     try {
       await sgMail.send({ to, from: FROM_EMAIL, subject, html });
       logger.info({ to }, `📧 Email sent via SendGrid`);
       return true;
     } catch (error: any) {
-      logger.error({ to, error: error?.response?.body || error }, '❌ SendGrid failed to send email');
-      return false;
+      logger.error({ to, error: error?.response?.body || error }, '❌ SendGrid failed — cascading to SMTP');
+      // Fall through to SMTP
     }
   }
 
-  if (transport === 'smtp' && smtpTransporter) {
+  // Try SMTP next
+  if (smtpTransporter) {
     try {
       await smtpTransporter.sendMail({ from: `"LearnTrace" <${FROM_EMAIL}>`, to, subject, html });
       logger.info({ to }, '📧 Email sent via SMTP');
       return true;
     } catch (error) {
-      logger.error({ to, error }, '❌ SMTP failed to send email');
-      return false;
+      logger.error({ to, error }, '❌ SMTP also failed to send email');
     }
   }
 
