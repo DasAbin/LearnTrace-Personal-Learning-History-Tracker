@@ -15,7 +15,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Menu,
-  X as XIcon
+  X as XIcon,
+  FileCheck
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -36,6 +37,7 @@ export const Layout = ({ children }: LayoutProps) => {
   };
 
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'HOD' || user?.role === 'TEACHER';
+  const isVacIncharge = user?.role === 'VAC_INCHARGE';
 
   const studentNav = [
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -43,6 +45,7 @@ export const Layout = ({ children }: LayoutProps) => {
     { path: '/badges', icon: Award, label: 'Badges' },
     { path: '/analytics', icon: BarChart3, label: 'Analytics' },
     { path: '/heatmap', icon: Calendar, label: 'Heatmap' },
+    { path: '/vac-refund', icon: FileCheck, label: 'VAC Refund' },
     { path: '/profile', icon: Settings, label: 'Profile' },
   ];
 
@@ -51,7 +54,12 @@ export const Layout = ({ children }: LayoutProps) => {
     { path: '/admin/classroom', icon: Users, label: 'Classroom', matchPrefix: true },
   ];
 
-  const navItems = isAdmin ? adminNav : studentNav;
+  const vacNav = [
+    { path: '/vac/requests', icon: FileCheck, label: 'VAC Requests' },
+    { path: '/profile', icon: Settings, label: 'Profile' },
+  ];
+
+  const navItems = isVacIncharge ? vacNav : isAdmin ? adminNav : studentNav;
 
   const isActive = (item: typeof navItems[0]) => {
     if ((item as any).matchPrefix) {
@@ -64,7 +72,7 @@ export const Layout = ({ children }: LayoutProps) => {
     <>
       {/* Logo */}
       <div className="px-4 py-5 border-b border-gray-100 flex items-center justify-between">
-        <Link to={isAdmin ? '/admin/dashboard' : '/dashboard'} className="flex items-center gap-2.5">
+        <Link to={isVacIncharge ? '/vac/requests' : isAdmin ? '/admin/dashboard' : '/dashboard'} className="flex items-center gap-2.5">
           <div className="h-9 w-9 bg-amber-500 rounded-xl flex items-center justify-center flex-shrink-0">
             <BookOpen className="h-4.5 w-4.5 text-white" />
           </div>
@@ -79,7 +87,7 @@ export const Layout = ({ children }: LayoutProps) => {
       </div>
 
       {/* Add Entry (Student only) */}
-      {!isAdmin && (
+      {!isAdmin && !isVacIncharge && (
         <div className="px-3 pt-4">
           <Link
             to="/entries/new"
@@ -97,6 +105,9 @@ export const Layout = ({ children }: LayoutProps) => {
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {isAdmin && !sidebarCollapsed && (
           <p className="px-3 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Administration</p>
+        )}
+        {isVacIncharge && !sidebarCollapsed && (
+          <p className="px-3 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">VAC Management</p>
         )}
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -126,7 +137,7 @@ export const Layout = ({ children }: LayoutProps) => {
       <div className="border-t border-gray-100 p-3">
         <div className={`flex items-center gap-3 ${sidebarCollapsed ? 'justify-center' : ''}`}>
           <div className={`h-9 w-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0 ${
-            isAdmin ? 'bg-amber-500' : 'bg-gray-900'
+            isAdmin || isVacIncharge ? 'bg-amber-500' : 'bg-gray-900'
           }`}>
             {user?.firstName?.[0]}{user?.lastName?.[0]}
           </div>
@@ -136,10 +147,12 @@ export const Layout = ({ children }: LayoutProps) => {
                 {user?.firstName} {user?.lastName}
               </p>
               <p className="text-xs text-gray-400 font-medium truncate flex items-center gap-1">
-                {isAdmin ? (
+                {isVacIncharge ? (
+                  <><FileCheck className="h-3 w-3" /> VAC Incharge</>
+                ) : isAdmin ? (
                   <><GraduationCap className="h-3 w-3" /> {user?.role === 'HOD' ? 'Head of Dept' : user?.role === 'TEACHER' ? 'Teacher' : 'Admin'}</>
                 ) : (
-                  <><>{user?.collegeName || user?.email}</>{' '}</>
+                  <><>{user?.collegeName || user?.email}</> </>
                 )}
               </p>
             </div>

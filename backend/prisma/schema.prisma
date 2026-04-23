@@ -25,11 +25,12 @@ model User {
   refreshToken      String?   @map("refresh_token")
   publicProfileId   String?   @unique @map("public_profile_id")
 
-  // role: "STUDENT" | "TEACHER" | "HOD" | "ADMIN"
-  // STUDENT  — one class, tracked by className
-  // TEACHER  — manages one class (assigned via assignedClass), sees only that class
-  // HOD      — Head of Department, sees all classes within their department
-  // ADMIN    — legacy super-admin, sees all classes across college
+  // role: "STUDENT" | "TEACHER" | "HOD" | "ADMIN" | "VAC_INCHARGE"
+  // STUDENT       — one class, tracked by className
+  // TEACHER       — manages one class (assigned via assignedClass), sees only that class
+  // HOD           — Head of Department, sees all classes within their department
+  // ADMIN         — legacy super-admin, sees all classes across college
+  // VAC_INCHARGE  — reviews VAC course refund requests, no class visibility
   role          String   @default("STUDENT")
   gender        String?
   collegeName   String?  @map("college_name")
@@ -39,7 +40,8 @@ model User {
   yearOfStudy   String?  @map("year_of_study")   // "First Year" | "Second Year" | etc.
   assignedClass String?  @map("assigned_class")  // For TEACHER: the ONE class they manage
 
-  entries LearningEntry[]
+  entries            LearningEntry[]
+  vacRefundRequests  VacRefundRequest[]
 
   @@index([collegeName, className])
   @@index([role, collegeName])
@@ -83,4 +85,36 @@ model IdempotencyKey {
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("idempotency_keys")
+}
+
+model VacRefundRequest {
+  id                   String    @id @default(uuid())
+  studentId            String    @map("student_id")
+
+  // Document URLs — stored as Cloudinary URLs (or local paths as fallback)
+  preApprovalPath      String?   @map("pre_approval_path")
+  certificatePath      String?   @map("certificate_path")
+  paymentReceiptPath   String?   @map("payment_receipt_path")
+  additionalDocPath    String?   @map("additional_doc_path")
+
+  // Submission metadata
+  courseName           String    @map("course_name")
+  platform             String
+  courseAmount         Float     @map("course_amount")
+  notes                String?
+
+  // Workflow status
+  status               String    @default("PENDING")   // "PENDING" | "APPROVED" | "REJECTED"
+  rejectionReason      String?   @map("rejection_reason")
+  reviewedBy           String?   @map("reviewed_by")
+  reviewedAt           DateTime? @map("reviewed_at")
+
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+
+  student              User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId, status])
+  @@index([status, createdAt(sort: Desc)])
+  @@map("vac_refund_requests")
 }

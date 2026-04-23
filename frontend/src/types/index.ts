@@ -3,7 +3,7 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
-  role: 'STUDENT' | 'TEACHER' | 'HOD' | 'ADMIN';
+  role: 'STUDENT' | 'TEACHER' | 'HOD' | 'ADMIN' | 'VAC_INCHARGE';
   gender?: string;
   collegeName?: string;
   department?: string;
@@ -100,4 +100,32 @@ export interface CollegeOverview {
     rollNumber?: string;
     createdAt: string;
   }[];
+}
+
+export interface VacRefundRequest {
+  id: string;
+  studentId: string;
+  courseName: string;
+  platform: string;
+  courseAmount: number;
+  notes?: string;
+  preApprovalPath?: string;
+  certificatePath?: string;
+  paymentReceiptPath?: string;
+  additionalDocPath?: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  rejectionReason?: string;
+  reviewedBy?: string;
+  reviewedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+  student?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    rollNumber?: string;
+    className?: string;
+    department?: string;
+  };
 }

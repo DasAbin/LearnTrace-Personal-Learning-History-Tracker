@@ -14,7 +14,7 @@ export const signup = [
     .matches(/[A-Z]/).withMessage('Password must contain at least one uppercase letter')
     .matches(/[0-9]/).withMessage('Password must contain at least one number')
     .matches(/[!@#$%^&*]/).withMessage('Password must contain at least one special character (!@#$%^&*)'),
-  body('role').optional().isIn(['STUDENT', 'TEACHER', 'HOD', 'ADMIN']).withMessage('Invalid role'),
+  body('role').optional().isIn(['STUDENT', 'TEACHER', 'HOD', 'ADMIN', 'VAC_INCHARGE']).withMessage('Invalid role'),
   body('gender').optional().isIn(['male', 'female', 'other']).withMessage('Invalid gender'),
   body('collegeName').optional().trim(),
   body('department').optional().trim(),

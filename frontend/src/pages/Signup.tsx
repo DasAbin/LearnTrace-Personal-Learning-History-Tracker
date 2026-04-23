@@ -4,10 +4,10 @@ import { useAuth } from '../contexts/AuthContext';
 import {
   ArrowRight, ArrowLeft, User, Mail, Lock, Loader2, Check, X,
   Eye, EyeOff, BookOpen, GraduationCap, Shield, Building2, Hash,
-  Users, BookMarked
+  Users, BookMarked, ClipboardCheck
 } from 'lucide-react';
 
-type Role = 'STUDENT' | 'TEACHER' | 'HOD' | 'ADMIN';
+type Role = 'STUDENT' | 'TEACHER' | 'HOD' | 'ADMIN' | 'VAC_INCHARGE';
 
 function getPasswordStrength(pw: string): { score: 0|1|2|3|4; label: string; color: string } {
   let score = 0;
@@ -42,6 +42,11 @@ const ROLE_CONFIG: Record<Role, { icon: any; title: string; desc: string }> = {
     icon: Shield,
     title: 'Admin',
     desc: 'Full access — view all classes across the college',
+  },
+  VAC_INCHARGE: {
+    icon: ClipboardCheck,
+    title: 'VAC Incharge',
+    desc: 'Review and approve student VAC course refund requests',
   },
 };
 
@@ -109,9 +114,11 @@ export default function Signup() {
         assignedClass:role === 'TEACHER' ? (assignedClass || undefined) : undefined,
       });
       // Redirect to dashboard; banner about email verification shown there
-      const dest = (role === 'ADMIN' || role === 'HOD' || role === 'TEACHER')
-        ? '/admin/dashboard'
-        : '/dashboard';
+      const dest = role === 'VAC_INCHARGE'
+        ? '/vac/requests'
+        : (role === 'ADMIN' || role === 'HOD' || role === 'TEACHER')
+          ? '/admin/dashboard'
+          : '/dashboard';
       navigate(dest);
     } catch (err: any) {
       setError(

@@ -26,6 +26,11 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return <Navigate to="/admin/dashboard" replace />;
   }
 
+  // Redirect VAC_INCHARGE to their dashboard
+  if (user.role === 'VAC_INCHARGE' && location.pathname === '/dashboard') {
+    return <Navigate to="/vac/requests" replace />;
+  }
+
   return <>{children}</>;
 };
 
@@ -48,6 +53,31 @@ export const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   }
   
   if (!['ADMIN', 'HOD', 'TEACHER'].includes(user.role)) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
+export const VacRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 text-amber-500 animate-spin mx-auto mb-3" />
+          <p className="text-sm text-gray-400 font-medium">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  if (user.role !== 'VAC_INCHARGE') {
     return <Navigate to="/dashboard" replace />;
   }
   

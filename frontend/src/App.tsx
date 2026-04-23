@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 // Stable Production Build v1.0.2 (Cache Busting Strategy)
 import { AuthProvider } from './contexts/AuthContext';
-import { ProtectedRoute, AdminRoute } from './components/ProtectedRoute';
+import { ProtectedRoute, AdminRoute, VacRoute } from './components/ProtectedRoute';
 import { Layout } from './components/Layout';
 import ErrorBoundary from './components/ErrorBoundary';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -32,6 +32,8 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import ClassroomIndex from './pages/admin/ClassroomIndex';
 import ClassroomView from './pages/admin/ClassroomView';
 import EmailVerified from './pages/EmailVerified';
+import VacRefund from './pages/VacRefund';
+import VacRequests from './pages/vac/VacRequests';
 
 function App() {
   return (
@@ -70,6 +72,10 @@ function App() {
                           <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
                           <Route path="/admin/classroom" element={<AdminRoute><ClassroomIndex /></AdminRoute>} />
                           <Route path="/admin/classroom/:className" element={<AdminRoute><ClassroomView /></AdminRoute>} />
+
+                          {/* VAC routes */}
+                          <Route path="/vac-refund" element={<VacRefund />} />
+                          <Route path="/vac/requests" element={<VacRoute><VacRequests /></VacRoute>} />
 
                           {/* Default redirect */}
                           <Route path="/" element={<Navigate to="/dashboard" replace />} />

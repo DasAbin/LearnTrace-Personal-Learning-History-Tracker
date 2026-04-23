@@ -18,7 +18,7 @@ export interface SignupData {
   lastName: string;
   email: string;
   password: string;
-  role?: 'STUDENT' | 'TEACHER' | 'HOD' | 'ADMIN';
+  role?: 'STUDENT' | 'TEACHER' | 'HOD' | 'ADMIN' | 'VAC_INCHARGE';
   gender?: string;
   collegeName?: string;
   department?: string;

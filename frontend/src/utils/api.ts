@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { AuthResponse, User, LearningEntry, DashboardSummary, ClassInfo, StudentSummary, StudentDetail, CollegeOverview } from '../types';
+import type { AuthResponse, User, LearningEntry, DashboardSummary, ClassInfo, StudentSummary, StudentDetail, CollegeOverview, VacRefundRequest } from '../types';
 
 /** Base backend origin without trailing slash */
 export const BACKEND_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001').replace(/\/+$/, '');
@@ -215,6 +215,37 @@ export const userAPI = {
   },
   deleteProfile: async (): Promise<void> => {
     await api.delete('/users/profile');
+  },
+};
+export const vacAPI = {
+  // Student
+  submitRequest: async (data: FormData): Promise<VacRefundRequest> => {
+    const response = await api.post('/vac/requests', data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  },
+  getMyRequests: async (): Promise<VacRefundRequest[]> => {
+    const response = await api.get('/vac/my-requests');
+    return response.data;
+  },
+
+  // VAC Incharge
+  getPendingRequests: async (): Promise<VacRefundRequest[]> => {
+    const response = await api.get('/vac/pending');
+    return response.data;
+  },
+  getCompletedRequests: async (): Promise<VacRefundRequest[]> => {
+    const response = await api.get('/vac/completed');
+    return response.data;
+  },
+  approveRequest: async (id: string): Promise<VacRefundRequest> => {
+    const response = await api.patch(`/vac/requests/${id}/approve`);
+    return response.data;
+  },
+  rejectRequest: async (id: string, rejectionReason: string): Promise<VacRefundRequest> => {
+    const response = await api.patch(`/vac/requests/${id}/reject`, { rejectionReason });
+    return response.data;
   },
 };
 

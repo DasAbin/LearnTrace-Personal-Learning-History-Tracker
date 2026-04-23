@@ -13,7 +13,17 @@ import * as analyticsController from './controllers/analyticsController';
 import * as userController from './controllers/userController';
 import * as aiController from './controllers/aiController';
 import * as adminController from './controllers/adminController';
+import * as vacController from './controllers/vacController';
+import { requireVacIncharge } from './middleware/vacMiddleware';
 import { upload, handleMulterError } from './utils/upload';
+
+// VAC: multi-file upload — one file per document field
+const vacUpload = upload.fields([
+  { name: 'preApproval',    maxCount: 1 },
+  { name: 'certificate',    maxCount: 1 },
+  { name: 'paymentReceipt', maxCount: 1 },
+  { name: 'additionalDoc',  maxCount: 1 },
+]);
 import { asyncHandler } from './middleware/asyncHandler';
 import logger from './lib/logger';
 import pinoHttp from 'pino-http';
@@ -192,6 +202,17 @@ apiRouter.get('/admin/overview', authenticate, requireAdmin, adminController.get
 apiRouter.get('/admin/classes', authenticate, requireStaff, adminController.getClasses);
 apiRouter.get('/admin/classes/:className/students', authenticate, requireStaff, adminController.getStudentsByClass);
 apiRouter.get('/admin/students/:studentId', authenticate, requireStaff, adminController.getStudentDetail);
+
+// VAC Refund routes — Student
+apiRouter.post('/vac/requests',        authenticate, vacUpload, handleMulterError, ...vacController.createVacRequest);
+apiRouter.get('/vac/my-requests',      authenticate, vacController.getMyVacRequests);
+
+// VAC Refund routes — VAC Incharge
+apiRouter.get('/vac/pending',          authenticate, requireVacIncharge, vacController.getPendingVacRequests);
+apiRouter.get('/vac/completed',        authenticate, requireVacIncharge, vacController.getCompletedVacRequests);
+apiRouter.patch('/vac/requests/:id/approve', authenticate, requireVacIncharge, vacController.approveVacRequest);
+apiRouter.patch('/vac/requests/:id/reject',  authenticate, requireVacIncharge, ...vacController.rejectVacRequest);
+
 app.use('/api/v1', apiRouter);
 
 // Error handler
