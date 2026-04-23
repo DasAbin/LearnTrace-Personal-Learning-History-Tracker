@@ -4,7 +4,7 @@ import { adminAPI } from '../../utils/api';
 import type { StudentSummary, StudentDetail } from '../../types';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Text, Environment, useGLTF, ContactShadows, Html } from '@react-three/drei';
-import { ArrowLeft, Loader2, X, BookOpen, Clock, Award, Users, Info } from 'lucide-react';
+import { ArrowLeft, Loader2, X, BookOpen, Clock, Award, Users, Info, FileCheck, IndianRupee, ExternalLink } from 'lucide-react';
 import * as THREE from 'three';
 import { SkeletonUtils } from 'three-stdlib';
 
@@ -258,6 +258,53 @@ function StudentDetailPanel({ studentId, onClose }: { studentId: string; onClose
                     </div>
                   );
                 })}
+              </div>
+            </div>
+          )}
+
+          {/* VAC Verified Courses — only rendered when approved requests exist */}
+          {detail.approvedVacRequests && detail.approvedVacRequests.length > 0 && (
+            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-3xl p-6">
+              <div className="flex items-center gap-2 mb-5">
+                <FileCheck className="h-4 w-4 text-emerald-400" />
+                <h4 className="text-xs font-bold text-emerald-300 tracking-widest">VAC VERIFIED COURSES</h4>
+                <span className="ml-auto text-[10px] font-bold bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                  {detail.approvedVacRequests.length} APPROVED
+                </span>
+              </div>
+              <div className="space-y-3">
+                {detail.approvedVacRequests.map((vac) => (
+                  <div key={vac.id} className="bg-white/5 border border-emerald-500/10 rounded-2xl p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-white truncate">{vac.courseName}</p>
+                        <p className="text-xs text-emerald-300 mt-0.5">{vac.platform}</p>
+                        {vac.reviewedAt && (
+                          <p className="text-[10px] text-gray-500 mt-1">
+                            Verified {new Date(vac.reviewedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                        <span className="flex items-center gap-0.5 text-sm font-black text-emerald-400">
+                          <IndianRupee className="h-3 w-3" />
+                          {vac.courseAmount.toLocaleString('en-IN')}
+                        </span>
+                        {vac.certificatePath && (
+                          <a
+                            href={vac.certificatePath}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-[10px] font-bold text-blue-400 hover:text-blue-300 transition-colors"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                            Cert
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           )}

@@ -77,6 +77,15 @@ export interface StudentDetail {
     createdAt: string;
   };
   entries: LearningEntry[];
+  approvedVacRequests?: {
+    id: string;
+    courseName: string;
+    platform: string;
+    courseAmount: number;
+    certificatePath?: string;
+    reviewedAt?: string;
+    createdAt: string;
+  }[];
   summary: {
     totalEntries: number;
     totalHours: number;
@@ -85,6 +94,7 @@ export interface StudentDetail {
     platforms: Record<string, number>;
   };
 }
+
 
 export interface CollegeOverview {
   collegeName: string;

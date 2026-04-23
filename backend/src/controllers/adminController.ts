@@ -87,13 +87,17 @@ export const getStudentsByClass = asyncHandler(async (req: Request, res: Respons
 });
 
 /**
- * Get full student detail (profile + learning entries + summary)
+ * Get full student detail (profile + learning entries + summary + approved VAC requests)
  */
 export const getStudentDetail = asyncHandler(async (req: Request, res: Response) => {
-  const collegeName = (req as any).adminCollegeName;
+  const collegeName = (req as any).adminCollegeName || (req as any).staffCollegeName;
   const { studentId } = req.params;
 
-  // Verify student belongs to admin's college
+  if (!collegeName) {
+    return res.status(400).json({ error: 'College not configured' });
+  }
+
+  // Verify student belongs to this staff member's college
   const student = await prisma.user.findFirst({
     where: {
       id: studentId,
@@ -124,6 +128,21 @@ export const getStudentDetail = asyncHandler(async (req: Request, res: Response)
     take: 50,
   });
 
+  // Get APPROVED VAC refund requests only
+  const approvedVacRequests = await prisma.vacRefundRequest.findMany({
+    where: { studentId, status: 'APPROVED' },
+    select: {
+      id: true,
+      courseName: true,
+      platform: true,
+      courseAmount: true,
+      certificatePath: true,
+      reviewedAt: true,
+      createdAt: true,
+    },
+    orderBy: { reviewedAt: 'desc' },
+  });
+
   // Calculate summary stats
   const totalHours = entries.reduce((sum, e) => sum + (e.hoursSpent || 0), 0);
   const allSkills = new Set(entries.flatMap(e => e.skills));
@@ -138,6 +157,7 @@ export const getStudentDetail = asyncHandler(async (req: Request, res: Response)
   res.json({
     student,
     entries,
+    approvedVacRequests,
     summary: {
       totalEntries: entries.length,
       totalHours,
@@ -147,6 +167,7 @@ export const getStudentDetail = asyncHandler(async (req: Request, res: Response)
     }
   });
 });
+
 
 /**
  * Get college overview stats for the admin dashboard
