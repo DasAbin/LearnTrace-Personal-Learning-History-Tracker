@@ -21,9 +21,12 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return <Navigate to="/login" replace />;
   }
 
-  // Redirect admin/staff to admin dashboard if they try to access root
-  if (['ADMIN', 'HOD', 'TEACHER'].includes(user.role) && location.pathname === '/dashboard') {
+  // Redirect admin/staff to appropriate dashboard if they try to access root
+  if (user.role === 'ADMIN' && location.pathname === '/dashboard') {
     return <Navigate to="/admin/dashboard" replace />;
+  }
+  if (['HOD', 'TEACHER'].includes(user.role) && location.pathname === '/dashboard') {
+    return <Navigate to="/admin/classroom" replace />;
   }
 
   // Redirect VAC_INCHARGE to their dashboard
