@@ -86,10 +86,10 @@ export const createVacRequest = [
         uploadVacFile(files, 'additionalDoc', studentId),
       ]);
 
-    // Require at least preApproval OR certificate
-    if (!preApprovalPath && !certificatePath) {
+    // Require preApproval AND certificate AND paymentReceipt
+    if (!preApprovalPath || !certificatePath || !paymentReceiptPath) {
       return res.status(400).json({
-        error: 'Please upload at least a pre-approval document or certificate proof.',
+        error: 'Pre-approval, certificate proof, and payment receipt are all required.',
       });
     }
 

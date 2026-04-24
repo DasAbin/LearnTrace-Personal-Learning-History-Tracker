@@ -132,8 +132,8 @@ export default function VacRefund() {
     setError('');
     setSuccess('');
 
-    if (!preApproval.file && !certificate.file) {
-      setError('Please upload at least a pre-approval document or certificate proof.');
+    if (!preApproval.file || !certificate.file || !paymentReceipt.file) {
+      setError('Pre-approval, certificate proof, and payment receipt are all required.');
       return;
     }
 
@@ -279,27 +279,27 @@ export default function VacRefund() {
             Supporting Documents
           </h2>
           <p className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-xl px-4 py-2.5 font-semibold">
-            ⚠️ At least a Pre-approval document or Certificate proof is required. Max 5 MB each.
+            ⚠️ Pre-approval, certificate proof, and payment receipt are required. Max 5 MB each.
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FileUploadZone
               label="Pre-approval / Minute Sheet"
-              hint="PDF or image · Required if no certificate"
+              hint="PDF or image · Required"
               slot={preApproval}
               onChange={setFile(setPreApproval)}
               onRemove={clearFile(setPreApproval)}
             />
             <FileUploadZone
               label="Certificate Proof"
-              hint="Course completion certificate"
+              hint="Course completion certificate · Required"
               slot={certificate}
               onChange={setFile(setCertificate)}
               onRemove={clearFile(setCertificate)}
             />
             <FileUploadZone
               label="Payment Receipt / Email"
-              hint="Payment proof or confirmation email"
+              hint="Payment proof or confirmation email · Required"
               slot={paymentReceipt}
               onChange={setFile(setPaymentReceipt)}
               onRemove={clearFile(setPaymentReceipt)}

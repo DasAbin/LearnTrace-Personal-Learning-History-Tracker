@@ -268,7 +268,7 @@ export const extractCertificateData = [
       const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
       const completion = await groq.chat.completions.create({
-        model: 'llama-3.2-11b-vision-preview',
+        model: 'llama-3.2-90b-vision-preview',
         max_tokens: 1024,
         messages: [
           {
