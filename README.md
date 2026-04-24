@@ -1,18 +1,17 @@
 # LearnTrace
 
-A personal learning history and analytics platform that allows users to log learning activities, visualize their learning timeline, analyze skill/domain patterns, and upload certificates.
+A comprehensive personal learning history and institutional tracking platform designed to log learning activities, analyze domains and skill patterns, automatically extract certificate credentials using AI, and manage institutional workflows like VAC refund requests.
 
-## 🚀 Features
+## 🚀 Key Features
 
-- **Authentication**: Secure JWT-based authentication system
-- **Dashboard**: Overview with stats (total entries, hours, streak, unique skills) and recent activity
-- **Learning Entries**: Add, edit, delete learning entries with certificates
-- **Timeline View**: Reverse chronological list with filtering capabilities
-- **Entry Details**: Full view of learning entries with certificate display
-- **Badge Vault**: Gallery view of all certificates with filters
-- **Analytics**: Domain distribution, yearly trends, platform usage, and skills frequency
-- **Heatmap**: GitHub-style calendar heatmap showing learning activity
-- **Profile & Settings**: User profile, data export (JSON/CSV), and account management
+- **Multi-Role Authentication**: JWT-based secure authentication with OTP email verification (via SendGrid). Distinct roles supported: Student, Teacher, HOD, Admin, and VAC Incharge.
+- **AI-Powered Certificate Extraction**: Upload a certificate image and let the Groq Vision AI model automatically extract and populate the course title, domain, description, skills, and deep reflection.
+- **VAC Refund Management**: Dedicated institutional workflow for handling VAC refund requests, complete with secure multi-document handling (Pre-Approval, Certificate, Receipt) and administrative tracking.
+- **Advanced Cloud Media**: Highly reliable image and PDF document storage powered by Cloudinary.
+- **Dynamic Dashboards**: User-specific dashboards equipped with progress statistics (total entries, hours, streak, skills) and immersive 3D Canvas visual models for progress monitoring (for staff/admin roles).
+- **Comprehensive Timeline & Timeline Share**: Explore entries chronologically, quickly copy direct share links, or download them as PDFs.
+- **Robust Analytics**: Deep insights into domain distribution, yearly trends, platform usage, and skills frequency.
+- **Personalized Profiles & Data Export**: Tailored profiles based on your institutional role, with support for exporting your complete history as JSON or CSV.
 
 ## 📋 Prerequisites
 
@@ -20,7 +19,9 @@ Before you begin, ensure you have the following installed:
 
 - **Node.js** (v18 or higher)
 - **PostgreSQL** (v14 or higher)
-- **npm** or **yarn**
+- **Cloudinary** account (for media storage)
+- **Groq** account (for AI Vision auto-extraction)
+- **SendGrid** account (for email verification)
 
 ## 🛠️ Setup Instructions
 
@@ -36,7 +37,7 @@ cd ../frontend
 npm install
 ```
 
-### 2. Database Setup
+### 2. Database & Environment Setup
 
 1. Create a PostgreSQL database:
 
@@ -44,41 +45,45 @@ npm install
 CREATE DATABASE learntrace;
 ```
 
-2. Configure environment variables:
+2. Configure environment variables for the backend:
 
 ```bash
 cd backend
 cp .env.example .env
 ```
 
-Edit `.env` with your database credentials:
+Edit `.env` with your API keys and database credentials:
 
 ```env
-DATABASE_URL="postgresql://user:password@localhost:5432/learntrace?schema=public"
-JWT_SECRET="your-super-secret-jwt-key-change-this-in-production"
+# Server & Client
 PORT=3001
 NODE_ENV=development
 FRONTEND_URL="http://localhost:5173"
+
+# Database
+DATABASE_URL="postgresql://user:password@localhost:5432/learntrace?schema=public"
+
+# Auth
+JWT_SECRET="your-super-secret-jwt-key"
+
+# Integrations
+CLOUDINARY_CLOUD_NAME="..."
+CLOUDINARY_API_KEY="..."
+CLOUDINARY_API_SECRET="..."
+GROQ_API_KEY="..."
+SENDGRID_API_KEY="..."
+EMAIL_FROM="your-verified-sender@example.com"
 ```
 
 3. Run Prisma migrations:
 
 ```bash
 cd backend
-npm run prisma:generate
-npm run prisma:migrate
+npx prisma generate
+npx prisma migrate dev
 ```
 
-### 3. Create Uploads Directory
-
-Ensure the uploads directory exists:
-
-```bash
-cd backend
-mkdir -p uploads/certificates
-```
-
-### 4. Run the Application
+### 3. Run the Application
 
 **Terminal 1 - Backend:**
 
@@ -98,7 +103,7 @@ npm run dev
 
 The frontend application will start on `http://localhost:5173`
 
-### 5. Access the Application
+### 4. Access the Application
 
 Open your browser and navigate to:
 ```
@@ -108,138 +113,60 @@ http://localhost:5173
 ## 📁 Project Structure
 
 ```
-epd-s1/
+learntrace/
 ├── backend/
 │   ├── src/
-│   │   ├── controllers/    # Route handlers
-│   │   ├── services/       # Business logic
-│   │   ├── middleware/     # Auth, error handling
-│   │   ├── utils/          # Utilities (file upload)
-│   │   ├── types/          # TypeScript types
-│   │   ├── lib/            # Prisma client
-│   │   └── index.ts        # Express server
-│   ├── prisma/
-│   │   └── schema.prisma   # Database schema
-│   ├── uploads/
-│   │   └── certificates/   # Certificate storage
+│   │   ├── controllers/    # Route handlers for auth, entries, AI, analytics
+│   │   ├── services/       # Business logic operations
+│   │   ├── middleware/     # JWT Auth, Role validation, Error handling
+│   │   ├── utils/          # Utilities (Cloudinary uploads, Emailers)
+│   │   ├── lib/            # Prisma client instance
+│   │   └── index.ts        # Express server setup
+│   ├── prisma/             # Prisma Schema
 │   └── package.json
-├── frontend/
-│   ├── src/
-│   │   ├── components/     # Reusable components
-│   │   ├── pages/          # Page components
-│   │   ├── contexts/       # React contexts (Auth)
-│   │   ├── utils/          # API utilities
-│   │   ├── types/          # TypeScript types
-│   │   ├── App.tsx         # Main app component
-│   │   └── main.tsx        # Entry point
-│   └── package.json
-└── README.md
+└── frontend/
+    ├── src/
+    │   ├── components/     # Reusable components (3D elements, layouts)
+    │   ├── pages/          # Interactive pages tailored per role
+    │   ├── contexts/       # React contexts (Auth State)
+    │   ├── utils/          # API interfaces and string formatters
+    │   ├── App.tsx         # Main entry point & Protected Routing
+    │   └── main.css        # Tailwind config styles
+    └── package.json
 ```
 
-## 🔑 API Endpoints
+## 🔑 Main API Endpoints
 
-### Authentication
-- `POST /auth/signup` - Register a new user
-- `POST /auth/login` - Login user
-- `GET /auth/me` - Get current user (protected)
+### Authentication & Users
+- `POST /api/v1/auth/signup` - Register a user (triggers OTP)
+- `POST /api/v1/auth/verify-email` - Verify email with OTP
+- `POST /api/v1/auth/login` - Login user
+- `GET /api/v1/users/profile` - Standard user profiles and dashboards
 
-### Learning Entries
-- `POST /entries` - Create a new entry (protected)
-- `GET /entries` - Get all entries with optional filters (protected)
-- `GET /entries/:id` - Get entry by ID (protected)
-- `PUT /entries/:id` - Update entry (protected)
-- `DELETE /entries/:id` - Delete entry (protected)
+### Learning Entries & Extraction
+- `POST /api/v1/entries` - Create an entry with Cloudinary upload
+- `POST /api/v1/entries/extract-certificate` - Groq Vision auto-extraction AI
+- `GET /api/v1/entries` - Fetch filtered entries
 
-### Analytics
-- `GET /analytics/summary` - Get dashboard summary (protected)
-- `GET /analytics/domain-distribution` - Get domain distribution (protected)
-- `GET /analytics/yearly-trend` - Get yearly trend (protected)
-- `GET /analytics/platform-usage` - Get platform usage (protected)
-- `GET /analytics/skills-frequency` - Get skills frequency (protected)
-- `GET /analytics/heatmap` - Get heatmap data (protected)
+### VAC Refund Flow
+- `POST /api/v1/vac-refund` - Upload multiple VAC documents for refund analysis
+- `GET /api/v1/vac-refund` - Retrieve refund statuses (by role context)
 
 ## 🎨 Design System
 
-The application follows a consistent design system:
+The application relies heavily on dynamic and modern UI components:
+- **Primary Accents**: High contrast, highly legible interactive colors (#4A90E2, #d97706)
+- **Glassmorphism & Shadows**: Interactive cards and timeline nodes to reflect progression.
+- **Typography**: Inter / Sans-serif for all UI elements.
+- Uses **Tailwind CSS** heavily for flexible alignment and responsive bounds.
+- Incorporates dynamic **Lucide React** icon usage.
 
-- **Primary Blue**: #4A90E2
-- **Deep Blue**: #2C3E50
-- **Success Green**: #27AE60
-- **Soft Purple**: #9B59B6 (Analytics highlights)
-- **Warm Orange**: #E67E22
-- **Alert Red**: #E74C3C
-- **Background**: #F8F9FA
-- **Card Background**: #FFFFFF
+## 📝 General Notes
 
-Typography uses Inter font with defined heading sizes and body text.
-
-## 🔒 Authentication
-
-The application uses JWT-based authentication:
-- Tokens are stored in localStorage
-- Tokens expire after 7 days
-- Protected routes require valid authentication
-- Password hashing uses bcrypt with 10 salt rounds
-
-## 📦 Building for Production
-
-### Backend
-
-```bash
-cd backend
-npm run build
-npm start
-```
-
-### Frontend
-
-```bash
-cd frontend
-npm run build
-```
-
-The production build will be in `frontend/dist/`
-
-## 🧪 Development
-
-### Database Management
-
-```bash
-# Generate Prisma Client
-npm run prisma:generate
-
-# Run migrations
-npm run prisma:migrate
-
-# Open Prisma Studio (database GUI)
-npm run prisma:studio
-```
-
-## 📝 Notes
-
-- File uploads are stored locally in `backend/uploads/certificates/`
-- Images are limited to 5MB and only image formats are accepted
-- The application is mobile-responsive with a mobile-first design approach
-- All dates are stored in UTC and displayed in the user's local timezone
-
-## 🐛 Troubleshooting
-
-### Database Connection Issues
-
-Ensure PostgreSQL is running and the connection string in `.env` is correct.
-
-### File Upload Issues
-
-Ensure the `uploads/certificates` directory exists and has write permissions.
-
-### CORS Issues
-
-If you encounter CORS errors, check that `FRONTEND_URL` in the backend `.env` matches your frontend URL.
-
-### Port Already in Use
-
-Change the port in the respective `package.json` or `.env` files if ports 3001 (backend) or 5173 (frontend) are in use.
+- All document and image media automatically upload to Cloudinary. Raw files (PDFs) are stored safely as `resource_type: "raw"`. 
+- Local uploads directories are no longer required as they have been migrated completely to cloud integrations.
+- Role management prevents Teachers and Admins from viewing irrelevant student features such as personal streak timelines.
 
 ## 📄 License
 
-This project is built as a production-quality MVP for demonstration purposes.
+Built as an advanced, production-quality educational technology system.
