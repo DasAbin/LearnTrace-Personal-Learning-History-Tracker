@@ -11,6 +11,30 @@ export default function EntryDetail() {
   const [entry, setEntry] = useState<LearningEntry | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
+
+  const handleCopyLink = async () => {
+    try {
+      const shareUrl = `${window.location.origin}/entries/${id}`;
+      await navigator.clipboard.writeText(shareUrl);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch {
+      const el = document.createElement('textarea');
+      el.value = `${window.location.origin}/entries/${id}`;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    }
+  };
+
+  const handleDownloadPDF = () => {
+    if (!entry) return;
+    window.print();
+  };
 
   useEffect(() => {
     if (id) {
@@ -232,8 +256,18 @@ export default function EntryDetail() {
             <div className="p-8 bg-gray-900 rounded-[32px] text-white space-y-4">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Quick Share</p>
                 <div className="flex gap-2">
-                    <button className="flex-1 py-3 bg-white/10 hover:bg-white/20 transition-colors rounded-xl text-xs font-bold">Copy Link</button>
-                    <button className="flex-1 py-3 bg-orange-500 hover:bg-orange-600 transition-colors rounded-xl text-xs font-bold">Download PDF</button>
+                    <button
+                      onClick={handleCopyLink}
+                      className="flex-1 py-3 bg-white/10 hover:bg-white/20 transition-colors rounded-xl text-xs font-bold"
+                    >
+                      {copySuccess ? '✓ Copied!' : 'Copy Link'}
+                    </button>
+                    <button
+                      onClick={handleDownloadPDF}
+                      className="flex-1 py-3 bg-orange-500 hover:bg-orange-600 transition-colors rounded-xl text-xs font-bold"
+                    >
+                      Download PDF
+                    </button>
                 </div>
             </div>
         </aside>

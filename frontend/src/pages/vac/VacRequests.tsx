@@ -89,14 +89,23 @@ export default function VacRequests() {
     }
   };
 
-  const renderDocLink = (path: string | undefined | null, label: string) => {
-    if (!path) return (
+  const renderDocLink = (docPath: string | undefined | null, label: string) => {
+    if (!docPath) return (
       <span className="text-xs text-gray-300 font-medium">{label}: N/A</span>
     );
-    const url = getCertificateUrl(path);
+    const url = getCertificateUrl(docPath);
+    if (!url) return null;
+
+    const isPdf = docPath.toLowerCase().endsWith('.pdf') || url.toLowerCase().endsWith('.pdf');
+
+    // For PDFs: open with Google Docs viewer as fallback (handles CORS/content-type issues)
+    const viewUrl = isPdf
+      ? `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`
+      : url;
+
     return (
       <a
-        href={url || '#'}
+        href={viewUrl}
         target="_blank"
         rel="noreferrer"
         className="inline-flex items-center gap-1 text-xs font-semibold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-lg hover:bg-amber-100 transition-colors"

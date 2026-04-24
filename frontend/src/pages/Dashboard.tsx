@@ -134,8 +134,10 @@ export default function Dashboard() {
               {summary?.recentEntries && summary.recentEntries.length > 0 ? (
                 <div className="space-y-3">
                   {summary.recentEntries.map((entry: LearningEntry, idx: number) => (
-                    <div key={entry.id}
-                      className="bg-white p-5 rounded-xl border border-gray-200 hover:border-gray-300 transition-all hover:shadow-md group"
+                    <Link
+                      key={entry.id}
+                      to={`/entries/${entry.id}`}
+                      className="block bg-white p-5 rounded-xl border border-gray-200 hover:border-gray-300 transition-all hover:shadow-md group cursor-pointer"
                       style={{ animationDelay: `${idx * 80}ms` }}
                     >
                       <div className="flex items-start justify-between">
@@ -160,12 +162,11 @@ export default function Dashboard() {
                             )}
                           </div>
                         </div>
-                        <Link to={`/entries/${entry.id}`}
-                          className="p-2 text-gray-300 hover:text-amber-500 transition-colors ml-3">
+                        <span className="p-2 text-gray-300 group-hover:text-amber-500 transition-colors ml-3">
                           <ArrowUpRight className="h-5 w-5" />
-                        </Link>
+                        </span>
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               ) : (

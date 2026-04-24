@@ -8,7 +8,13 @@ const API_URL = BACKEND_URL + '/api/v1';
 /** Build full certificate URL */
 export const getCertificateUrl = (certPath: string | null | undefined): string | null => {
   if (!certPath) return null;
-  if (certPath.startsWith('http')) return certPath;
+  if (certPath.startsWith('http')) {
+    // Fix existing Cloudinary PDF URLs that may have been uploaded with wrong resource_type.
+    if (certPath.includes('res.cloudinary.com') && certPath.toLowerCase().endsWith('.pdf')) {
+      return certPath.replace('/image/upload/', '/raw/upload/');
+    }
+    return certPath;
+  }
   return `${BACKEND_URL}${certPath}`;
 };
 
@@ -151,6 +157,23 @@ export const entriesAPI = {
   },
   delete: async (id: string): Promise<void> => {
     await api.delete(`/entries/${id}`);
+  },
+  extractCertificate: async (file: File): Promise<{
+    extracted: {
+      title?: string;
+      platform?: string;
+      description?: string;
+      skills?: string[];
+      domain?: string;
+    } | null;
+    reason?: string;
+  }> => {
+    const formData = new FormData();
+    formData.append('certificate', file);
+    const response = await api.post('/entries/extract-certificate', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
   },
 };
 

@@ -26,10 +26,16 @@ async function uploadVacFile(
     const fs = await import('fs');
 
     const publicId = `${userId}-${Date.now()}-${crypto.randomUUID()}`;
+
+    // Determine correct resource_type for Cloudinary
+    const fileExt = path.extname(file.originalname).toLowerCase();
+    const isPdf = fileExt === '.pdf' || file.mimetype === 'application/pdf';
+    const resourceType: 'raw' | 'image' = isPdf ? 'raw' : 'image';
+
     const result = await cloudinary.uploader.upload(file.path, {
       folder: 'learntrace/vac-documents',
       public_id: publicId,
-      resource_type: 'auto',
+      resource_type: resourceType,
     });
 
     // Clean up temp file

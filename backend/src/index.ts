@@ -171,6 +171,7 @@ apiRouter.post('/auth/send-verification', authenticate, authController.sendVerif
 apiRouter.get('/auth/verify-email', authController.verifyEmail);
 
 // Entry routes
+apiRouter.post('/entries/extract-certificate', authenticate, upload.single('certificate'), handleMulterError, ...entryController.extractCertificateData);
 apiRouter.post('/entries', authenticate, upload.single('certificate'), handleMulterError, entryController.createEntry);
 apiRouter.get('/entries', authenticate, entryController.getEntries);
 apiRouter.get('/entries/metadata', authenticate, entryController.getMetadata);

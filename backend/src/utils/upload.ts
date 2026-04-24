@@ -89,15 +89,22 @@ export const upload = multer({
 export async function uploadToCloudinary(
   filePath: string,
   userId: string,
+  folder: string = 'learntrace/certificates',
 ): Promise<string | null> {
   if (!CLOUDINARY_OK) return null;
 
   try {
     const publicId = `${userId}-${Date.now()}-${crypto.randomUUID()}`;
+
+    // Determine resource_type: PDFs must use 'raw' to preserve binary integrity
+    const ext = path.extname(filePath).toLowerCase();
+    const isPdf = ext === '.pdf';
+    const resourceType: 'raw' | 'image' | 'auto' = isPdf ? 'raw' : 'image';
+
     const result = await cloudinary.uploader.upload(filePath, {
-      folder: 'learntrace/certificates',
+      folder,
       public_id: publicId,
-      resource_type: 'auto',
+      resource_type: resourceType,
     });
 
     logger.info({ publicId, url: result.secure_url }, '☁️ Certificate uploaded to Cloudinary');

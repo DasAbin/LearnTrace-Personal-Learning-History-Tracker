@@ -156,7 +156,7 @@ export const updateEntry = [
   body('startDate').optional().isISO8601(),
   body('completionDate').optional().isISO8601(),
   body('hoursSpent').optional().isInt({ min: 0, max: 10000 }).withMessage('Hours spent must be a positive number'),
-  body('skills').optional().isArray(),
+  body('skills').optional(), // parsed manually below as JSON string from FormData
   
   async (req: AuthRequest, res: Response) => {
     try {
@@ -244,3 +244,78 @@ export const deleteEntry = asyncHandler(async (req: AuthRequest, res: Response) 
   res.status(204).send();
 });
 
+// ── Certificate Auto-Extraction ───────────────────────────────────────────────
+export const extractCertificateData = [
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    // Only process images — PDFs are too complex for vision extraction
+    const isImage = req.file.mimetype.startsWith('image/');
+    if (!isImage) {
+      try { fs.unlinkSync(req.file.path); } catch {}
+      return res.json({ extracted: null, reason: 'PDF files are not supported for auto-extraction' });
+    }
+
+    try {
+      // Convert image to base64 for Groq Vision
+      const imageBuffer = fs.readFileSync(req.file.path);
+      const base64Image = imageBuffer.toString('base64');
+      const mimeType = req.file.mimetype;
+
+      const Groq = (await import('groq-sdk')).default;
+      const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
+      const completion = await groq.chat.completions.create({
+        model: 'llama-3.2-11b-vision-preview',
+        max_tokens: 1024,
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'image_url',
+                image_url: {
+                  url: `data:${mimeType};base64,${base64Image}`,
+                },
+              },
+              {
+                type: 'text',
+                text: `You are analyzing a learning certificate or course completion document.
+Extract the following information from this certificate image and return ONLY a valid JSON object with no markdown, no explanation, no extra text:
+{
+  "title": "Full name of the course or certification",
+  "platform": "Name of the issuing platform or organization (e.g. Coursera, Udemy, Google, Microsoft)",
+  "description": "A 1-2 sentence description of what was learned",
+  "skills": ["skill1", "skill2", "skill3"],
+  "domain": "One of: Programming, Data Science, Design, Business, Marketing, Language, Science, Engineering, Art, Other"
+}
+If you cannot determine a field, use null for strings and [] for arrays. Never guess — only extract what is clearly visible.`,
+              },
+            ],
+          },
+        ],
+      });
+
+      const content = completion.choices[0]?.message?.content || '{}';
+
+      let extracted: any = {};
+      try {
+        const cleaned = content.replace(/```json|```/g, '').trim();
+        extracted = JSON.parse(cleaned);
+      } catch {
+        extracted = null;
+      }
+
+      // Clean up temp file
+      try { fs.unlinkSync(req.file.path); } catch {}
+
+      return res.json({ extracted });
+    } catch (error: any) {
+      try { if (req.file?.path) fs.unlinkSync(req.file.path); } catch {}
+      logger.error({ error: error.message }, '⚠️ Certificate extraction failed');
+      return res.json({ extracted: null, reason: 'Extraction failed' });
+    }
+  }),
+];
