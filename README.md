@@ -1,61 +1,136 @@
+# Contributors
+
+This project was collaboratively developed by:
+
+- Adarsh Rana
+- Abindas P
+
+---
+
 # LearnTrace
 
 A comprehensive personal learning history and institutional tracking platform designed to log learning activities, analyze domains and skill patterns, automatically extract certificate credentials using AI, and manage institutional workflows like VAC refund requests.
 
-## 🚀 Key Features
+---
 
-- **Multi-Role Authentication**: JWT-based secure authentication with OTP email verification (via SendGrid). Distinct roles supported: Student, Teacher, HOD, Admin, and VAC Incharge.
-- **AI-Powered Certificate Extraction**: Upload a certificate image and let the Groq Vision AI model automatically extract and populate the course title, domain, description, skills, and deep reflection.
-- **VAC Refund Management**: Dedicated institutional workflow for handling VAC refund requests, complete with secure multi-document handling (Pre-Approval, Certificate, Receipt) and administrative tracking.
-- **Advanced Cloud Media**: Highly reliable image and PDF document storage powered by Cloudinary.
-- **Dynamic Dashboards**: User-specific dashboards equipped with progress statistics (total entries, hours, streak, skills) and immersive 3D Canvas visual models for progress monitoring (for staff/admin roles).
-- **Comprehensive Timeline & Timeline Share**: Explore entries chronologically, quickly copy direct share links, or download them as PDFs.
-- **Robust Analytics**: Deep insights into domain distribution, yearly trends, platform usage, and skills frequency.
-- **Personalized Profiles & Data Export**: Tailored profiles based on your institutional role, with support for exporting your complete history as JSON or CSV.
+##  Key Features
 
-## 📋 Prerequisites
+- **Multi-Role Authentication**  
+  JWT-based secure authentication with OTP email verification (via SendGrid). Distinct roles supported:
+  - Student
+  - Teacher
+  - HOD
+  - Admin
+  - VAC Incharge
 
-Before you begin, ensure you have the following installed:
+- **AI-Powered Certificate Extraction**  
+  Upload a certificate image and let the Groq Vision AI model automatically extract and populate:
+  - Course title
+  - Domain
+  - Description
+  - Skills
+  - Deep reflection
+
+- **VAC Refund Management**  
+  Dedicated institutional workflow for handling VAC refund requests with secure multi-document handling:
+  - Pre-Approval
+  - Certificate
+  - Receipt
+  - Administrative tracking
+
+- **Advanced Cloud Media**  
+  Reliable image and PDF document storage powered by Cloudinary.
+
+- **Dynamic Dashboards**  
+  User-specific dashboards equipped with:
+  - Progress statistics
+  - Total entries
+  - Learning hours
+  - Streaks
+  - Skills analytics
+  - Immersive 3D visual monitoring
+
+- **Comprehensive Timeline & Sharing**  
+  Explore learning entries chronologically, copy direct share links, and export timelines as PDFs.
+
+- **Robust Analytics**  
+  Insights into:
+  - Domain distribution
+  - Yearly trends
+  - Platform usage
+  - Skills frequency
+
+- **Personalized Profiles & Data Export**  
+  Role-based profiles with support for exporting complete learning history as:
+  - JSON
+  - CSV
+
+---
+
+##  Prerequisites
+
+Before you begin, ensure the following are installed:
 
 - **Node.js** (v18 or higher)
 - **PostgreSQL** (v14 or higher)
-- **Cloudinary** account (for media storage)
-- **Groq** account (for AI Vision auto-extraction)
-- **SendGrid** account (for email verification)
+- **Cloudinary Account**
+- **Groq Account**
+- **SendGrid Account**
 
-## 🛠️ Setup Instructions
+---
 
-### 1. Clone and Install Dependencies
+#  Setup Instructions
+
+##  Clone Repository
 
 ```bash
-# Backend setup
+git clone https://github.com/your-username/LearnTrace.git
+cd LearnTrace
+```
+
+---
+
+## Install Dependencies
+
+### Backend
+
+```bash
 cd backend
 npm install
+```
 
-# Frontend setup
+### Frontend
+
+```bash
 cd ../frontend
 npm install
 ```
 
-### 2. Database & Environment Setup
+---
 
-1. Create a PostgreSQL database:
+## Database Setup
+
+Create PostgreSQL database:
 
 ```sql
 CREATE DATABASE learntrace;
 ```
 
-2. Configure environment variables for the backend:
+---
+
+##  Configure Environment Variables
+
+Move to backend directory:
 
 ```bash
 cd backend
 cp .env.example .env
 ```
 
-Edit `.env` with your API keys and database credentials:
+Edit `.env` file:
 
 ```env
-# Server & Client
+# Server
 PORT=3001
 NODE_ENV=development
 FRONTEND_URL="http://localhost:5173"
@@ -63,110 +138,170 @@ FRONTEND_URL="http://localhost:5173"
 # Database
 DATABASE_URL="postgresql://user:password@localhost:5432/learntrace?schema=public"
 
-# Auth
-JWT_SECRET="your-super-secret-jwt-key"
+# JWT
+JWT_SECRET="your-secret-key"
 
-# Integrations
+# Cloudinary
 CLOUDINARY_CLOUD_NAME="..."
 CLOUDINARY_API_KEY="..."
 CLOUDINARY_API_SECRET="..."
+
+# Groq AI
 GROQ_API_KEY="..."
+
+# SendGrid
 SENDGRID_API_KEY="..."
-EMAIL_FROM="your-verified-sender@example.com"
+EMAIL_FROM="your-email@example.com"
 ```
 
-3. Run Prisma migrations:
+---
+
+##  Prisma Setup
 
 ```bash
-cd backend
 npx prisma generate
 npx prisma migrate dev
 ```
 
-### 3. Run the Application
+---
 
-**Terminal 1 - Backend:**
+#  Running the Application
+
+## Terminal 1 — Backend
 
 ```bash
 cd backend
 npm run dev
 ```
 
-The backend server will start on `http://localhost:3001`
+Backend runs on:
 
-**Terminal 2 - Frontend:**
+```text
+http://localhost:3001
+```
+
+---
+
+## Terminal 2 — Frontend
 
 ```bash
 cd frontend
 npm run dev
 ```
 
-The frontend application will start on `http://localhost:5173`
+Frontend runs on:
 
-### 4. Access the Application
-
-Open your browser and navigate to:
-```
+```text
 http://localhost:5173
 ```
 
-## 📁 Project Structure
+---
 
+#  Access Application
+
+Open browser and visit:
+
+```text
+http://localhost:5173
 ```
+
+---
+
+# 📁 Project Structure
+
+```text
 learntrace/
 ├── backend/
 │   ├── src/
-│   │   ├── controllers/    # Route handlers for auth, entries, AI, analytics
-│   │   ├── services/       # Business logic operations
-│   │   ├── middleware/     # JWT Auth, Role validation, Error handling
-│   │   ├── utils/          # Utilities (Cloudinary uploads, Emailers)
-│   │   ├── lib/            # Prisma client instance
-│   │   └── index.ts        # Express server setup
-│   ├── prisma/             # Prisma Schema
+│   │   ├── controllers/
+│   │   ├── services/
+│   │   ├── middleware/
+│   │   ├── utils/
+│   │   ├── lib/
+│   │   └── index.ts
+│   ├── prisma/
 │   └── package.json
+│
 └── frontend/
     ├── src/
-    │   ├── components/     # Reusable components (3D elements, layouts)
-    │   ├── pages/          # Interactive pages tailored per role
-    │   ├── contexts/       # React contexts (Auth State)
-    │   ├── utils/          # API interfaces and string formatters
-    │   ├── App.tsx         # Main entry point & Protected Routing
-    │   └── main.css        # Tailwind config styles
+    │   ├── components/
+    │   ├── pages/
+    │   ├── contexts/
+    │   ├── utils/
+    │   ├── App.tsx
+    │   └── main.css
     └── package.json
 ```
 
-## 🔑 Main API Endpoints
+---
 
-### Authentication & Users
-- `POST /api/v1/auth/signup` - Register a user (triggers OTP)
-- `POST /api/v1/auth/verify-email` - Verify email with OTP
-- `POST /api/v1/auth/login` - Login user
-- `GET /api/v1/users/profile` - Standard user profiles and dashboards
+# Main API Endpoints
 
-### Learning Entries & Extraction
-- `POST /api/v1/entries` - Create an entry with Cloudinary upload
-- `POST /api/v1/entries/extract-certificate` - Groq Vision auto-extraction AI
-- `GET /api/v1/entries` - Fetch filtered entries
+## Authentication & Users
 
-### VAC Refund Flow
-- `POST /api/v1/vac-refund` - Upload multiple VAC documents for refund analysis
-- `GET /api/v1/vac-refund` - Retrieve refund statuses (by role context)
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/v1/auth/signup` | Register user |
+| POST | `/api/v1/auth/verify-email` | Verify OTP |
+| POST | `/api/v1/auth/login` | Login user |
+| GET | `/api/v1/users/profile` | Fetch user profile |
 
-## 🎨 Design System
+---
 
-The application relies heavily on dynamic and modern UI components:
-- **Primary Accents**: High contrast, highly legible interactive colors (#4A90E2, #d97706)
-- **Glassmorphism & Shadows**: Interactive cards and timeline nodes to reflect progression.
-- **Typography**: Inter / Sans-serif for all UI elements.
-- Uses **Tailwind CSS** heavily for flexible alignment and responsive bounds.
-- Incorporates dynamic **Lucide React** icon usage.
+## Learning Entries
 
-## 📝 General Notes
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/v1/entries` | Create entry |
+| POST | `/api/v1/entries/extract-certificate` | AI extraction |
+| GET | `/api/v1/entries` | Fetch entries |
 
-- All document and image media automatically upload to Cloudinary. Raw files (PDFs) are stored safely as `resource_type: "raw"`. 
-- Local uploads directories are no longer required as they have been migrated completely to cloud integrations.
-- Role management prevents Teachers and Admins from viewing irrelevant student features such as personal streak timelines.
+---
 
-## 📄 License
+## VAC Refund Flow
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/v1/vac-refund` | Upload VAC documents |
+| GET | `/api/v1/vac-refund` | Fetch refund status |
+
+---
+
+#  Design System
+
+The platform uses a modern and interactive UI system featuring:
+
+- Tailwind CSS
+- Glassmorphism components
+- Responsive layouts
+- Lucide React icons
+- Interactive dashboard visualizations
+- 3D UI integrations
+
+### Primary Accent Colors
+
+- `#4A90E2`
+- `#d97706`
+
+### Typography
+
+- Inter
+- Sans-serif
+
+---
+
+# General Notes
+
+- All media uploads are securely stored on Cloudinary.
+- Raw PDF files are stored using:
+  ```text
+  resource_type: "raw"
+  ```
+- Local upload directories are no longer required.
+- Role-based restrictions ensure users only access relevant features.
+
+---
+
+#  License
 
 Built as an advanced, production-quality educational technology system.
